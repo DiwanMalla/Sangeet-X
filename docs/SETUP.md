@@ -1,0 +1,285 @@
+# SangeetX Setup Guide
+
+This guide will help you set up the SangeetX music streaming platform locally and deploy it to production.
+
+## Prerequisites
+
+- Node.js 18+ and npm/yarn
+- Git
+- A code editor (VS Code recommended)
+
+## Local Development Setup
+
+### 1. Clone and Install
+
+```bash
+# Clone the repository
+git clone <your-repo-url>
+cd SangeetX
+
+# Install dependencies
+npm install
+```
+
+### 2. Environment Configuration
+
+Copy the environment example file:
+
+```bash
+cp .env.example .env.local
+```
+
+Edit `.env.local` with your configuration:
+
+```env
+# Required for Cloudinary (recommended)
+NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME="your_cloud_name"
+NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET="your_upload_preset"
+
+# Optional: Other storage providers
+STORAGE_PROVIDER="cloudinary"
+```
+
+### 3. Set Up Cloud Storage (Choose One)
+
+#### Option A: Cloudinary (Recommended)
+
+1. Sign up at [cloudinary.com](https://cloudinary.com)
+2. Get your cloud name from the dashboard
+3. Create an upload preset:
+   - Go to Settings → Upload
+   - Click "Add upload preset"
+   - Set mode to "Unsigned"
+   - Name it "sangeetx_preset"
+   - Configure folder as "sangeetx"
+   - Save the preset
+
+#### Option B: Other Providers
+
+See `docs/STORAGE.md` for detailed setup instructions for:
+
+- Firebase Storage
+- AWS S3
+- Supabase Storage
+- Vercel Blob
+
+### 4. Run the Development Server
+
+```bash
+npm run dev
+```
+
+Open [http://localhost:3000](http://localhost:3000) in your browser.
+
+### 5. Test the Admin Upload
+
+1. Navigate to [http://localhost:3000/admin/upload](http://localhost:3000/admin/upload)
+2. Fill out the form with song details
+3. Upload a cover image and audio file
+4. Click "Upload Song"
+
+## Project Structure
+
+```
+SangeetX/
+├── src/
+│   ├── app/                # Next.js app router
+│   │   ├── admin/         # Admin pages
+│   │   ├── api/           # API routes
+│   │   └── page.tsx       # Homepage
+│   ├── components/        # React components
+│   │   ├── ui/           # UI components
+│   │   └── layout/       # Layout components
+│   ├── lib/              # Utilities and services
+│   ├── data/             # Mock data
+│   └── types/            # TypeScript types
+├── docs/                 # Documentation
+├── public/               # Static assets
+└── package.json
+```
+
+## Key Features Implemented
+
+### ✅ Completed Features
+
+1. **Homepage**
+
+   - Music search functionality
+   - Genre browsing
+   - Popular songs display
+   - Audio player with controls
+   - Recently played section
+
+2. **Admin Panel**
+
+   - Song upload form
+   - File validation
+   - Cover image preview
+   - Audio file preview
+   - Progress tracking
+   - Error handling
+
+3. **API Routes**
+
+   - `/api/songs` - CRUD operations for songs
+   - In-memory storage (ready for database integration)
+
+4. **UI Components**
+   - Responsive design
+   - Dark/light theme support
+   - Modern glassmorphism styling
+   - Mobile-friendly navigation
+
+### 🚧 Next Steps
+
+1. **Database Integration**
+
+   - Set up Prisma with PostgreSQL/MySQL
+   - Or use Supabase for full-stack solution
+   - Or use MongoDB for NoSQL approach
+
+2. **Authentication**
+
+   - Implement NextAuth.js
+   - Protect admin routes
+   - Add user accounts
+
+3. **Advanced Features**
+   - Playlist management
+   - User favorites
+   - Music recommendations
+   - Social features
+
+## Database Setup (Optional)
+
+### Option A: Prisma + PostgreSQL
+
+```bash
+# Install Prisma
+npm install prisma @prisma/client
+
+# Initialize Prisma
+npx prisma init
+
+# Edit prisma/schema.prisma with your models
+# Run migrations
+npx prisma migrate dev
+```
+
+### Option B: Supabase
+
+```bash
+# Install Supabase
+npm install @supabase/supabase-js
+
+# Set up environment variables
+NEXT_PUBLIC_SUPABASE_URL="your_supabase_url"
+NEXT_PUBLIC_SUPABASE_ANON_KEY="your_anon_key"
+```
+
+### Option C: MongoDB
+
+```bash
+# Install MongoDB
+npm install mongodb mongoose
+
+# Set up environment variables
+DATABASE_URL="mongodb://localhost:27017/sangeetx"
+```
+
+## Deployment
+
+### Vercel (Recommended)
+
+1. Push code to GitHub
+2. Connect repository to Vercel
+3. Set environment variables in Vercel dashboard
+4. Deploy automatically on push
+
+### Other Platforms
+
+See `docs/DEPLOYMENT.md` for detailed deployment instructions for:
+
+- Netlify
+- Railway
+- Heroku
+- DigitalOcean
+
+## Environment Variables Reference
+
+```env
+# Storage (Required)
+NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME="your_cloud_name"
+NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET="your_upload_preset"
+
+# Database (Optional)
+DATABASE_URL="your_database_url"
+
+# Authentication (Optional)
+NEXTAUTH_URL="your_app_url"
+NEXTAUTH_SECRET="your_secret"
+
+# Admin (Optional)
+ADMIN_EMAIL="admin@sangeetx.com"
+ADMIN_PASSWORD="your_admin_password"
+```
+
+## Troubleshooting
+
+### Common Issues
+
+1. **Upload fails with CORS error**
+
+   - Check your Cloudinary upload preset settings
+   - Ensure the preset is set to "Unsigned"
+
+2. **Images not loading**
+
+   - Verify `next.config.ts` has the correct domains
+   - Check your cloud storage URLs
+
+3. **Audio player not working**
+   - Ensure audio files are properly uploaded
+   - Check browser console for errors
+
+### Getting Help
+
+1. Check the documentation in the `docs/` folder
+2. Review the API documentation in `docs/API.md`
+3. Check the issue tracker
+4. Join our community discussions
+
+## Development Commands
+
+```bash
+# Start development server
+npm run dev
+
+# Build for production
+npm run build
+
+# Start production server
+npm start
+
+# Lint code
+npm run lint
+
+# Type check
+npm run type-check
+```
+
+## Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Add tests if applicable
+5. Submit a pull request
+
+## License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
+
+---
+
+Happy coding! 🎵

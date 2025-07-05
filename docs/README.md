@@ -1,0 +1,300 @@
+# SangeetX - Modern Music Streaming Platform
+
+![SangeetX Logo](../public/logo.svg)
+
+## 🎵 Overview
+
+SangeetX is a modern, responsive music streaming platform built with Next.js, TypeScript, and Tailwind CSS. It provides users with an intuitive interface to discover, search, and play music with a sleek, modern design.
+
+## ✨ Features
+
+### Core Features
+
+- 🎵 **Music Player**: Advanced audio player with play/pause, skip, repeat, and shuffle
+- 🔍 **Search**: Powerful search functionality for songs, artists, and albums
+- 🎭 **Genres**: Browse music by different genres (Pop, Rock, Hip-Hop, Electronic, etc.)
+- 🔥 **Popular Songs**: Trending and popular music discovery
+- 📱 **Responsive Design**: Optimized for desktop, tablet, and mobile devices
+- 🎨 **Modern UI**: Clean, attractive interface with smooth animations
+
+### User Experience
+
+- 🌙 **Dark/Light Theme**: Toggle between dark and light modes
+- 🎵 **Playlist Management**: Create, edit, and manage personal playlists
+- ❤️ **Favorites**: Like and save favorite songs
+- 🔄 **Recently Played**: Access recently played tracks
+- 📊 **Music Discovery**: Personalized recommendations
+
+## 🛠️ Tech Stack
+
+### Frontend
+
+- **Framework**: Next.js 15.3.5
+- **Language**: TypeScript
+- **Styling**: Tailwind CSS v4
+- **Icons**: Lucide React / Heroicons
+- **State Management**: React Context API + useReducer
+- **Audio**: HTML5 Audio API
+
+### Development Tools
+
+- **Linting**: ESLint
+- **Package Manager**: npm
+- **Build Tool**: Turbopack (Next.js)
+
+## 📁 Project Structure
+
+```
+SangeetX/
+├── docs/                    # Documentation
+│   ├── README.md
+│   ├── API.md
+│   └── DEPLOYMENT.md
+├── public/                  # Static assets
+│   ├── icons/
+│   ├── images/
+│   └── audio/
+├── src/
+│   ├── app/                 # App Router (Next.js 13+)
+│   │   ├── layout.tsx
+│   │   ├── page.tsx
+│   │   ├── globals.css
+│   │   ├── search/
+│   │   ├── genres/
+│   │   ├── popular/
+│   │   └── playlist/
+│   ├── components/          # Reusable components
+│   │   ├── ui/              # Basic UI components
+│   │   ├── layout/          # Layout components
+│   │   ├── music/           # Music-related components
+│   │   └── common/          # Common components
+│   ├── lib/                 # Utilities and configurations
+│   │   ├── utils.ts
+│   │   ├── constants.ts
+│   │   └── types.ts
+│   ├── hooks/               # Custom React hooks
+│   │   ├── useAudio.ts
+│   │   ├── useLocalStorage.ts
+│   │   └── useSearch.ts
+│   ├── context/             # React Context
+│   │   ├── MusicContext.tsx
+│   │   └── ThemeContext.tsx
+│   └── data/                # Mock data and APIs
+│       ├── songs.ts
+│       ├── genres.ts
+│       └── playlists.ts
+├── package.json
+├── tsconfig.json
+├── tailwind.config.js
+└── next.config.js
+```
+
+## 🎨 Design System
+
+### Color Palette
+
+```css
+/* Primary Colors */
+--primary-purple: #8B5CF6
+--primary-blue: #3B82F6
+--primary-pink: #EC4899
+
+/* Neutral Colors */
+--gray-50: #F9FAFB
+--gray-900: #111827
+
+/* Accent Colors */
+--accent-green: #10B981
+--accent-orange: #F59E0B
+--accent-red: #EF4444
+```
+
+### Typography
+
+- **Font Family**: Inter (Google Fonts)
+- **Font Weights**: 300, 400, 500, 600, 700
+- **Font Sizes**: 12px - 48px with responsive scaling
+
+### Components
+
+- **Cards**: Rounded corners, subtle shadows, hover effects
+- **Buttons**: Multiple variants (primary, secondary, ghost, outline)
+- **Forms**: Clean inputs with proper validation states
+- **Navigation**: Sticky navbar with smooth scroll behavior
+
+## 🚀 Getting Started
+
+### Prerequisites
+
+- Node.js 18+
+- npm or yarn
+
+### Installation
+
+1. **Clone the repository**
+
+```bash
+git clone https://github.com/yourusername/sangeetx.git
+cd sangeetx
+```
+
+2. **Install dependencies**
+
+```bash
+npm install
+```
+
+3. **Run the development server**
+
+```bash
+npm run dev
+```
+
+4. **Open your browser**
+   Navigate to `http://localhost:3000`
+
+## 📱 Responsive Design
+
+### Breakpoints
+
+- **Mobile**: 320px - 767px
+- **Tablet**: 768px - 1023px
+- **Desktop**: 1024px+
+
+### Features by Device
+
+- **Mobile**: Simplified navigation, swipe gestures, bottom player
+- **Tablet**: Adaptive grid layouts, sidebar navigation
+- **Desktop**: Full sidebar, multi-column layouts, keyboard shortcuts
+
+## 🔧 Configuration
+
+### Environment Variables
+
+```env
+NEXT_PUBLIC_API_URL=https://api.sangeetx.com
+NEXT_PUBLIC_AUDIO_CDN=https://cdn.sangeetx.com
+```
+
+### Tailwind Configuration
+
+Custom theme extensions for brand colors, spacing, and animations.
+
+## 🎵 Audio Features
+
+### Supported Formats
+
+- MP3, AAC, OGG, FLAC
+- Streaming and progressive download
+- Gapless playback support
+
+### Player Controls
+
+- Play/Pause/Stop
+- Next/Previous track
+- Shuffle/Repeat modes
+- Volume control
+- Progress seeking
+- Crossfade (premium feature)
+
+## 🔍 Search Functionality
+
+### Search Types
+
+- **Quick Search**: Instant results as you type
+- **Advanced Search**: Filters by artist, album, genre, year
+- **Voice Search**: Speech-to-text search (premium feature)
+
+### Search Algorithms
+
+- Fuzzy string matching
+- Popularity-based ranking
+- User preference weighting
+
+## 📊 Performance
+
+### Optimization Strategies
+
+- **Image Optimization**: Next.js Image component with WebP support
+- **Code Splitting**: Automatic page-level code splitting
+- **Prefetching**: Link prefetching for faster navigation
+- **Caching**: Browser and CDN caching strategies
+- **Lazy Loading**: Progressive loading of audio and images
+
+### Performance Metrics
+
+- **First Contentful Paint**: < 1.5s
+- **Largest Contentful Paint**: < 2.5s
+- **Time to Interactive**: < 3.5s
+- **Cumulative Layout Shift**: < 0.1
+
+## 🧪 Testing
+
+### Test Coverage
+
+- Unit tests for components
+- Integration tests for user flows
+- E2E tests for critical paths
+- Performance testing
+- Accessibility testing
+
+### Testing Tools
+
+- Jest + React Testing Library
+- Cypress for E2E testing
+- Lighthouse for performance audits
+
+## 🔒 Security
+
+### Data Protection
+
+- No user data collection without consent
+- Secure audio streaming
+- HTTPS enforcement
+- Content Security Policy (CSP)
+
+## 📈 Analytics
+
+### Tracking Events
+
+- Song plays and skips
+- Search queries
+- User engagement metrics
+- Performance monitoring
+
+## 🚀 Deployment
+
+### Deployment Options
+
+- **Vercel**: Recommended for Next.js
+- **Netlify**: Alternative static hosting
+- **AWS/GCP**: For enterprise deployments
+
+### CI/CD Pipeline
+
+- Automated testing
+- Code quality checks
+- Performance monitoring
+- Deployment previews
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Add tests
+5. Submit a pull request
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## 🙏 Acknowledgments
+
+- Icons by [Lucide](https://lucide.dev/)
+- Fonts by [Google Fonts](https://fonts.google.com/)
+- Audio samples from [Freesound](https://freesound.org/)
+
+---
+
+**SangeetX** - Where music meets technology 🎵✨
