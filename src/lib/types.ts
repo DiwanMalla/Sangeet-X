@@ -1,11 +1,16 @@
 export interface Song {
   id: string;
   title: string;
-  artist: string;
-  album: string;
+  artistId: string;
+  artist?: {
+    id: string;
+    name: string;
+    avatar?: string;
+  };
+  album?: string;
   duration: number; // in seconds
-  genre: string;
-  year: number;
+  genre?: string;
+  year?: number;
   coverUrl: string;
   audioUrl: string;
   popularity: number;
@@ -18,12 +23,14 @@ export interface Song {
 export interface Artist {
   id: string;
   name: string;
-  bio: string;
-  imageUrl: string;
-  genres: string[];
-  popularity: number;
-  followers: number;
+  bio?: string;
+  avatar?: string;
+  coverImage?: string;
+  website?: string;
+  socialLinks?: Record<string, string>;
   verified: boolean;
+  songCount: number;
+  playCount: number;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -59,11 +66,11 @@ export interface Playlist {
 export interface Genre {
   id: string;
   name: string;
-  description: string;
+  description?: string;
   color: string;
-  imageUrl: string;
-  popularity: number;
   songCount: number;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 export interface User {

@@ -16,9 +16,7 @@ import {
   Music2,
   PlayCircle,
 } from "lucide-react";
-import { Song } from "@/lib/types";
-import { mockSongs, getPopularSongs } from "@/data/songs";
-import { getPopularGenres } from "@/data/genres";
+import { Song, Artist, Genre } from "@/lib/types";
 import { cn, formatTime } from "@/lib/utils";
 
 export default function HomePage() {
@@ -34,15 +32,54 @@ export default function HomePage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [queue, setQueue] = useState<Song[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [songs, setSongs] = useState<Song[]>([]);
+  const [artists, setArtists] = useState<Artist[]>([]);
+  const [genres, setGenres] = useState<Genre[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const popularSongs = getPopularSongs();
-  const popularGenres = getPopularGenres();
+  // Fetch data from API
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        const [popularResponse, songsResponse] = await Promise.all([
+          fetch("/api/popular"),
+          fetch("/api/songs"),
+        ]);
+
+        if (!popularResponse.ok || !songsResponse.ok) {
+          throw new Error("Failed to fetch data");
+        }
+
+        const popularData = await popularResponse.json();
+        const songsData = await songsResponse.json();
+
+        if (popularData.success) {
+          setSongs(popularData.data.songs);
+          setArtists(popularData.data.artists);
+          setGenres(popularData.data.genres);
+        }
+
+        if (songsData.success) {
+          setQueue(songsData.data);
+        }
+      } catch (error) {
+        console.error("Error fetching data:", error);
+        setError("Failed to load data. Please try again.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
 
   const handlePlaySong = (song: Song) => {
     setCurrentSong(song);
     setIsPlaying(true);
-    setQueue(mockSongs);
-    setCurrentIndex(mockSongs.findIndex((s) => s.id === song.id));
+    setQueue(queue.length > 0 ? queue : [song]);
+    setCurrentIndex(queue.findIndex((s) => s.id === song.id));
   };
 
   const handlePlayPause = () => {
@@ -93,22 +130,7 @@ export default function HomePage() {
     }
   };
 
-  // Mock audio time updates
-  useEffect(() => {
-    if (isPlaying && currentSong) {
-      const interval = setInterval(() => {
-        setCurrentTime((prev) => {
-          if (prev >= duration) {
-            return 0;
-          }
-          return prev + 1;
-        });
-      }, 1000);
-      return () => clearInterval(interval);
-    }
-  }, [isPlaying, currentSong, duration]);
-
-  // Set mock duration when song changes
+  // Set duration when song changes
   useEffect(() => {
     if (currentSong) {
       setDuration(currentSong.duration);
@@ -156,161 +178,183 @@ export default function HomePage() {
         {/* Main Content */}
         <div className="px-4 py-8 sm:px-6 lg:px-8">
           <div className="max-w-7xl mx-auto">
-            {/* Popular Songs */}
-            <section className="mb-12">
-              <div className="flex items-center space-x-2 mb-6">
-                <TrendingUp className="h-6 w-6 text-purple-600" />
-                <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
-                  Popular Right Now
-                </h2>
+            {/* Loading State */}
+            {loading && (
+              <div className="flex justify-center py-12">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600"></div>
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {popularSongs.slice(0, 6).map((song) => (
-                  <Card
-                    key={song.id}
-                    className="group cursor-pointer hover:shadow-lg transition-shadow"
-                  >
-                    <CardContent className="p-4">
-                      <div className="flex items-center space-x-4">
-                        <div className="relative w-16 h-16 rounded-lg overflow-hidden">
+            )}
+
+            {/* Error State */}
+            {error && (
+              <div className="text-center py-12">
+                <p className="text-red-600 mb-4">{error}</p>
+                <Button onClick={() => window.location.reload()}>
+                  Try Again
+                </Button>
+              </div>
+            )}
+
+            {/* Content */}
+            {!loading && !error && (
+              <>
+                {/* Popular Songs */}
+                <section className="mb-12">
+                  <div className="flex items-center space-x-2 mb-6">
+                    <TrendingUp className="h-6 w-6 text-purple-600" />
+                    <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
+                      Popular Right Now
+                    </h2>
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {songs.slice(0, 6).map((song) => (
+                      <Card
+                        key={song.id}
+                        className="group cursor-pointer hover:shadow-lg transition-shadow"
+                      >
+                        <CardContent className="p-4">
+                          <div className="flex items-center space-x-4">
+                            <div className="relative w-16 h-16 rounded-lg overflow-hidden">
+                              <Image
+                                src={song.coverUrl}
+                                alt={song.title}
+                                fill
+                                className="object-cover group-hover:scale-105 transition-transform"
+                              />
+                              <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  onClick={() => handlePlaySong(song)}
+                                  className="text-white hover:bg-white/20"
+                                >
+                                  <Play className="h-6 w-6" />
+                                </Button>
+                              </div>
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <h3 className="font-semibold text-gray-900 dark:text-white truncate">
+                                {song.title}
+                              </h3>
+                              <p className="text-sm text-gray-500 dark:text-gray-400 truncate">
+                                {song.artist?.name || "Unknown Artist"}
+                              </p>
+                              <div className="flex items-center space-x-2 mt-2">
+                                <Clock className="h-3 w-3 text-gray-400" />
+                                <span className="text-xs text-gray-400">
+                                  {formatTime(song.duration)}
+                                </span>
+                                <Heart
+                                  className={cn(
+                                    "h-3 w-3",
+                                    song.isLiked
+                                      ? "text-red-500 fill-red-500"
+                                      : "text-gray-400"
+                                  )}
+                                />
+                              </div>
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                </section>
+
+                {/* Browse by Genre */}
+                <section className="mb-12">
+                  <div className="flex items-center space-x-2 mb-6">
+                    <Music2 className="h-6 w-6 text-purple-600" />
+                    <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
+                      Browse by Genre
+                    </h2>
+                  </div>
+                  <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+                    {genres.map((genre) => (
+                      <Card
+                        key={genre.id}
+                        className="group cursor-pointer hover:shadow-lg transition-shadow"
+                      >
+                        <CardContent className="p-4">
+                          <div className="aspect-square rounded-lg mb-3 overflow-hidden relative">
+                            <div
+                              className="absolute inset-0 bg-gradient-to-br opacity-80"
+                              style={{
+                                backgroundImage: `linear-gradient(135deg, ${genre.color}, ${genre.color}CC)`,
+                              }}
+                            />
+                            <div className="absolute inset-0 flex items-center justify-center">
+                              <PlayCircle className="h-8 w-8 text-white opacity-70 group-hover:opacity-100 transition-opacity" />
+                            </div>
+                          </div>
+                          <h3 className="font-semibold text-gray-900 dark:text-white text-sm">
+                            {genre.name}
+                          </h3>
+                          <p className="text-xs text-gray-500 dark:text-gray-400">
+                            {genre.songCount} songs
+                          </p>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                </section>
+
+                {/* Recently Played */}
+                <section className="mb-12">
+                  <div className="flex items-center space-x-2 mb-6">
+                    <Clock className="h-6 w-6 text-purple-600" />
+                    <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
+                      Recently Played
+                    </h2>
+                  </div>
+                  <div className="space-y-2">
+                    {queue.slice(0, 5).map((song, index) => (
+                      <div
+                        key={song.id}
+                        className="flex items-center space-x-4 p-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 cursor-pointer group"
+                        onClick={() => handlePlaySong(song)}
+                      >
+                        <div className="flex-shrink-0 w-8 text-center">
+                          <span className="text-sm text-gray-500 dark:text-gray-400 group-hover:hidden">
+                            {index + 1}
+                          </span>
+                          <Play className="h-4 w-4 text-gray-500 dark:text-gray-400 hidden group-hover:block" />
+                        </div>
+                        <div className="relative w-12 h-12 rounded-md overflow-hidden">
                           <Image
                             src={song.coverUrl}
                             alt={song.title}
                             fill
-                            className="object-cover group-hover:scale-105 transition-transform"
+                            className="object-cover"
                           />
-                          <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              onClick={() => handlePlaySong(song)}
-                              className="text-white hover:bg-white/20"
-                            >
-                              <Play className="h-6 w-6" />
-                            </Button>
-                          </div>
                         </div>
                         <div className="flex-1 min-w-0">
-                          <h3 className="font-semibold text-gray-900 dark:text-white truncate">
+                          <h3 className="font-medium text-gray-900 dark:text-white truncate">
                             {song.title}
                           </h3>
                           <p className="text-sm text-gray-500 dark:text-gray-400 truncate">
-                            {song.artist}
+                            {song.artist?.name || "Unknown Artist"}
                           </p>
-                          <div className="flex items-center space-x-2 mt-2">
-                            <Clock className="h-3 w-3 text-gray-400" />
-                            <span className="text-xs text-gray-400">
-                              {formatTime(song.duration)}
-                            </span>
-                            <Heart
-                              className={cn(
-                                "h-3 w-3",
-                                song.isLiked
-                                  ? "text-red-500 fill-red-500"
-                                  : "text-gray-400"
-                              )}
-                            />
-                          </div>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <Heart
+                            className={cn(
+                              "h-4 w-4",
+                              song.isLiked
+                                ? "text-red-500 fill-red-500"
+                                : "text-gray-400"
+                            )}
+                          />
+                          <span className="text-sm text-gray-400">
+                            {formatTime(song.duration)}
+                          </span>
                         </div>
                       </div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            </section>
-
-            {/* Browse by Genre */}
-            <section className="mb-12">
-              <div className="flex items-center space-x-2 mb-6">
-                <Music2 className="h-6 w-6 text-purple-600" />
-                <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
-                  Browse by Genre
-                </h2>
-              </div>
-              <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
-                {popularGenres.map((genre) => (
-                  <Card
-                    key={genre.id}
-                    className="group cursor-pointer hover:shadow-lg transition-shadow"
-                  >
-                    <CardContent className="p-4">
-                      <div className="aspect-square rounded-lg mb-3 overflow-hidden relative">
-                        <div
-                          className="absolute inset-0 bg-gradient-to-br opacity-80"
-                          style={{
-                            backgroundImage: `linear-gradient(135deg, ${genre.color}, ${genre.color}CC)`,
-                          }}
-                        />
-                        <div className="absolute inset-0 flex items-center justify-center">
-                          <PlayCircle className="h-8 w-8 text-white opacity-70 group-hover:opacity-100 transition-opacity" />
-                        </div>
-                      </div>
-                      <h3 className="font-semibold text-gray-900 dark:text-white text-sm">
-                        {genre.name}
-                      </h3>
-                      <p className="text-xs text-gray-500 dark:text-gray-400">
-                        {genre.songCount} songs
-                      </p>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            </section>
-
-            {/* Recently Played */}
-            <section className="mb-12">
-              <div className="flex items-center space-x-2 mb-6">
-                <Clock className="h-6 w-6 text-purple-600" />
-                <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
-                  Recently Played
-                </h2>
-              </div>
-              <div className="space-y-2">
-                {mockSongs.slice(0, 5).map((song, index) => (
-                  <div
-                    key={song.id}
-                    className="flex items-center space-x-4 p-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 cursor-pointer group"
-                    onClick={() => handlePlaySong(song)}
-                  >
-                    <div className="flex-shrink-0 w-8 text-center">
-                      <span className="text-sm text-gray-500 dark:text-gray-400 group-hover:hidden">
-                        {index + 1}
-                      </span>
-                      <Play className="h-4 w-4 text-gray-500 dark:text-gray-400 hidden group-hover:block" />
-                    </div>
-                    <div className="relative w-12 h-12 rounded-md overflow-hidden">
-                      <Image
-                        src={song.coverUrl}
-                        alt={song.title}
-                        fill
-                        className="object-cover"
-                      />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <h3 className="font-medium text-gray-900 dark:text-white truncate">
-                        {song.title}
-                      </h3>
-                      <p className="text-sm text-gray-500 dark:text-gray-400 truncate">
-                        {song.artist}
-                      </p>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <Heart
-                        className={cn(
-                          "h-4 w-4",
-                          song.isLiked
-                            ? "text-red-500 fill-red-500"
-                            : "text-gray-400"
-                        )}
-                      />
-                      <span className="text-sm text-gray-400">
-                        {formatTime(song.duration)}
-                      </span>
-                    </div>
+                    ))}
                   </div>
-                ))}
-              </div>
-            </section>
+                </section>
+              </>
+            )}
           </div>
         </div>
       </main>

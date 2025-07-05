@@ -4,9 +4,18 @@ import { prisma } from "@/lib/prisma";
 export async function GET() {
   try {
     const songs = await prisma.song.findMany({
-      orderBy: { createdAt: 'desc' }
+      include: {
+        artist: {
+          select: {
+            id: true,
+            name: true,
+            avatar: true,
+          },
+        },
+      },
+      orderBy: { createdAt: "desc" },
     });
-    
+
     return NextResponse.json({
       success: true,
       data: songs,
@@ -26,7 +35,7 @@ export async function POST(request: NextRequest) {
     const songData = await request.json();
 
     // Validate required fields
-    const requiredFields = ["title", "artist", "audioUrl", "coverUrl"];
+    const requiredFields = ["title", "artistId", "audioUrl", "coverUrl"];
     for (const field of requiredFields) {
       if (!songData[field]) {
         return NextResponse.json(
@@ -40,7 +49,7 @@ export async function POST(request: NextRequest) {
     const newSong = await prisma.song.create({
       data: {
         title: songData.title,
-        artist: songData.artist,
+        artistId: songData.artistId,
         album: songData.album || null,
         duration: songData.duration || 0,
         genre: songData.genre || null,
@@ -71,7 +80,7 @@ export async function PUT(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
     const id = searchParams.get("id");
-    
+
     if (!id) {
       return NextResponse.json(
         { success: false, error: "Song ID is required" },
@@ -85,7 +94,7 @@ export async function PUT(request: NextRequest) {
       where: { id },
       data: {
         title: songData.title,
-        artist: songData.artist,
+        artistId: songData.artistId,
         album: songData.album || null,
         duration: songData.duration,
         genre: songData.genre || null,
@@ -95,6 +104,15 @@ export async function PUT(request: NextRequest) {
         popularity: songData.popularity,
         playCount: songData.playCount,
         isLiked: songData.isLiked,
+      },
+      include: {
+        artist: {
+          select: {
+            id: true,
+            name: true,
+            avatar: true,
+          },
+        },
       },
     });
 
@@ -116,7 +134,7 @@ export async function DELETE(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
     const id = searchParams.get("id");
-    
+
     if (!id) {
       return NextResponse.json(
         { success: false, error: "Song ID is required" },

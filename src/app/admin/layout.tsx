@@ -1,9 +1,9 @@
-'use client'
+"use client";
 
-import React, { useState } from 'react'
-import Link from 'next/link'
-import { usePathname } from 'next/navigation'
-import { Button } from '@/components/ui/button'
+import React, { useState } from "react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { Button } from "@/components/ui/button";
 import {
   LayoutDashboard,
   Music,
@@ -15,62 +15,75 @@ import {
   X,
   LogOut,
   Bell,
-  Search
-} from 'lucide-react'
-import { cn } from '@/lib/utils'
+  Search,
+  Mic,
+} from "lucide-react";
+import { cn } from "@/lib/utils";
 
 interface AdminLayoutProps {
-  children: React.ReactNode
+  children: React.ReactNode;
 }
 
 const adminNavItems = [
   {
-    name: 'Dashboard',
-    href: '/admin',
-    icon: LayoutDashboard
+    name: "Dashboard",
+    href: "/admin",
+    icon: LayoutDashboard,
   },
   {
-    name: 'Songs',
-    href: '/admin/songs',
-    icon: Music
+    name: "Songs",
+    href: "/admin/songs",
+    icon: Music,
   },
   {
-    name: 'Upload',
-    href: '/admin/upload',
-    icon: Upload
+    name: "Artists",
+    href: "/admin/artists",
+    icon: Mic,
   },
   {
-    name: 'Users',
-    href: '/admin/users',
-    icon: Users
+    name: "Upload",
+    href: "/admin/upload",
+    icon: Upload,
   },
   {
-    name: 'Analytics',
-    href: '/admin/analytics',
-    icon: BarChart3
+    name: "Users",
+    href: "/admin/users",
+    icon: Users,
   },
   {
-    name: 'Settings',
-    href: '/admin/settings',
-    icon: Settings
-  }
-]
+    name: "Analytics",
+    href: "/admin/analytics",
+    icon: BarChart3,
+  },
+  {
+    name: "Settings",
+    href: "/admin/settings",
+    icon: Settings,
+  },
+];
 
 export default function AdminLayout({ children }: AdminLayoutProps) {
-  const [sidebarOpen, setSidebarOpen] = useState(false)
-  const pathname = usePathname()
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const pathname = usePathname();
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       {/* Mobile sidebar */}
-      <div className={cn(
-        'fixed inset-0 z-50 lg:hidden',
-        sidebarOpen ? 'block' : 'hidden'
-      )}>
-        <div className="fixed inset-0 bg-black/50" onClick={() => setSidebarOpen(false)} />
+      <div
+        className={cn(
+          "fixed inset-0 z-50 lg:hidden",
+          sidebarOpen ? "block" : "hidden"
+        )}
+      >
+        <div
+          className="fixed inset-0 bg-black/50"
+          onClick={() => setSidebarOpen(false)}
+        />
         <div className="fixed inset-y-0 left-0 w-64 bg-white dark:bg-gray-800 shadow-xl">
           <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
-            <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Admin Panel</h2>
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+              Admin Panel
+            </h2>
             <Button
               variant="ghost"
               size="icon"
@@ -81,24 +94,24 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
           </div>
           <nav className="p-4">
             {adminNavItems.map((item) => {
-              const Icon = item.icon
-              const isActive = pathname === item.href
+              const Icon = item.icon;
+              const isActive = pathname === item.href;
               return (
                 <Link
                   key={item.name}
                   href={item.href}
                   className={cn(
-                    'flex items-center space-x-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors',
+                    "flex items-center space-x-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors",
                     isActive
-                      ? 'bg-purple-100 text-purple-700 dark:bg-purple-900 dark:text-purple-300'
-                      : 'text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700'
+                      ? "bg-purple-100 text-purple-700 dark:bg-purple-900 dark:text-purple-300"
+                      : "text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700"
                   )}
                   onClick={() => setSidebarOpen(false)}
                 >
                   <Icon className="h-5 w-5" />
                   <span>{item.name}</span>
                 </Link>
-              )
+              );
             })}
           </nav>
         </div>
@@ -108,37 +121,41 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
       <div className="hidden lg:fixed lg:inset-y-0 lg:flex lg:w-64 lg:flex-col">
         <div className="flex min-h-0 flex-1 flex-col bg-white dark:bg-gray-800 shadow-lg">
           <div className="flex items-center h-16 px-4 border-b border-gray-200 dark:border-gray-700">
-            <h1 className="text-xl font-bold text-gray-900 dark:text-white">SangeetX Admin</h1>
+            <h1 className="text-xl font-bold text-gray-900 dark:text-white">
+              SangeetX Admin
+            </h1>
           </div>
           <nav className="flex-1 p-4 space-y-1">
             {adminNavItems.map((item) => {
-              const Icon = item.icon
-              const isActive = pathname === item.href
+              const Icon = item.icon;
+              const isActive = pathname === item.href;
               return (
                 <Link
                   key={item.name}
                   href={item.href}
                   className={cn(
-                    'flex items-center space-x-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors',
+                    "flex items-center space-x-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors",
                     isActive
-                      ? 'bg-purple-100 text-purple-700 dark:bg-purple-900 dark:text-purple-300'
-                      : 'text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700'
+                      ? "bg-purple-100 text-purple-700 dark:bg-purple-900 dark:text-purple-300"
+                      : "text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700"
                   )}
                 >
                   <Icon className="h-5 w-5" />
                   <span>{item.name}</span>
                 </Link>
-              )
+              );
             })}
           </nav>
           <div className="p-4 border-t border-gray-200 dark:border-gray-700">
-            <Button
-              variant="ghost"
-              className="w-full justify-start text-red-600 hover:text-red-700 hover:bg-red-50"
-            >
-              <LogOut className="h-4 w-4 mr-2" />
-              Sign Out
-            </Button>
+            <Link href={"/"}>
+              <Button
+                variant="ghost"
+                className="w-full justify-start text-red-600 hover:text-red-700 hover:bg-red-50"
+              >
+                <LogOut className="h-4 w-4 mr-2" />
+                Sign Out
+              </Button>
+            </Link>
           </div>
         </div>
       </div>
@@ -180,10 +197,8 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
         </div>
 
         {/* Page content */}
-        <main className="flex-1">
-          {children}
-        </main>
+        <main className="flex-1">{children}</main>
       </div>
     </div>
-  )
+  );
 }

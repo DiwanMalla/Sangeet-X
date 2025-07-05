@@ -97,7 +97,7 @@ export default function AdminSongsPage() {
       filtered = filtered.filter(
         (song) =>
           song.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          song.artist.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          song.artist?.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
           song.album?.toLowerCase().includes(searchQuery.toLowerCase())
       );
     }
@@ -117,8 +117,8 @@ export default function AdminSongsPage() {
           bValue = b.title.toLowerCase();
           break;
         case "artist":
-          aValue = a.artist.toLowerCase();
-          bValue = b.artist.toLowerCase();
+          aValue = a.artist?.name.toLowerCase() || "";
+          bValue = b.artist?.name.toLowerCase() || "";
           break;
         case "plays":
           aValue = a.playCount || 0;
@@ -443,7 +443,7 @@ export default function AdminSongsPage() {
                         {song.title}
                       </h3>
                       <p className="text-sm text-gray-600 dark:text-gray-400 truncate">
-                        {song.artist}
+                        {song.artist?.name}
                       </p>
                       {song.album && (
                         <p className="text-xs text-gray-500 dark:text-gray-500 truncate">

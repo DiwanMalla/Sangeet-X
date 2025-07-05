@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -19,7 +19,7 @@ import { validateFile, getAudioDuration } from "@/lib/storage";
 
 interface UploadFormData {
   title: string;
-  artist: string;
+  artistId: string;
   album: string;
   genre: string;
   year: string;
@@ -28,10 +28,17 @@ interface UploadFormData {
   audioFile: File | null;
 }
 
+interface Artist {
+  id: string;
+  name: string;
+  avatar?: string;
+}
+
 export default function AdminUploadPage() {
+  const [artists, setArtists] = useState<Artist[]>([]);
   const [formData, setFormData] = useState<UploadFormData>({
     title: "",
-    artist: "",
+    artistId: "",
     album: "",
     genre: "",
     year: new Date().getFullYear().toString(),
@@ -48,6 +55,22 @@ export default function AdminUploadPage() {
   const [uploadMessage, setUploadMessage] = useState("");
   const [coverPreview, setCoverPreview] = useState<string | null>(null);
   const [audioPreview, setAudioPreview] = useState<string | null>(null);
+
+  useEffect(() => {
+    fetchArtists();
+  }, []);
+
+  const fetchArtists = async () => {
+    try {
+      const response = await fetch("/api/artists");
+      if (response.ok) {
+        const data = await response.json();
+        setArtists(data.artists || []);
+      }
+    } catch (error) {
+      console.error("Error fetching artists:", error);
+    }
+  };
 
   const genres = [
     "Pop",
@@ -122,8 +145,8 @@ export default function AdminUploadPage() {
       setUploadMessage("Song title is required");
       return false;
     }
-    if (!formData.artist.trim()) {
-      setUploadMessage("Artist name is required");
+    if (!formData.artistId.trim()) {
+      setUploadMessage("Artist is required");
       return false;
     }
     if (!formData.audioFile) {
@@ -157,10 +180,11 @@ export default function AdminUploadPage() {
 
     console.log("Uploading to Cloudinary:", {
       cloudName,
-      uploadPreset: process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET || "sangeetx_preset",
+      uploadPreset:
+        process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET || "sangeetx_preset",
       resourceType,
       fileName: file.name,
-      fileSize: file.size
+      fileSize: file.size,
     });
 
     const response = await fetch(
@@ -214,7 +238,7 @@ export default function AdminUploadPage() {
 
       const songData: Partial<Song> = {
         title: formData.title,
-        artist: formData.artist,
+        artistId: formData.artistId,
         album: formData.album,
         genre: formData.genre,
         year: parseInt(formData.year),
@@ -248,7 +272,7 @@ export default function AdminUploadPage() {
       setTimeout(() => {
         setFormData({
           title: "",
-          artist: "",
+          artistId: "",
           album: "",
           genre: "",
           year: new Date().getFullYear().toString(),
@@ -312,15 +336,21 @@ export default function AdminUploadPage() {
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                     Artist *
                   </label>
-                  <Input
-                    type="text"
-                    value={formData.artist}
+                  <select
+                    value={formData.artistId}
                     onChange={(e) =>
-                      handleInputChange("artist", e.target.value)
+                      handleInputChange("artistId", e.target.value)
                     }
-                    placeholder="Enter artist name"
+                    className="w-full h-10 px-3 rounded-md border border-gray-200 bg-white dark:border-gray-800 dark:bg-gray-950 dark:text-white"
                     required
-                  />
+                  >
+                    <option value="">Select an artist</option>
+                    {artists.map((artist) => (
+                      <option key={artist.id} value={artist.id}>
+                        {artist.name}
+                      </option>
+                    ))}
+                  </select>
                 </div>
 
                 <div>
@@ -427,7 +457,9 @@ export default function AdminUploadPage() {
                           type="button"
                           variant="outline"
                           className="mt-4"
-                          onClick={() => document.getElementById('cover-file-input')?.click()}
+                          onClick={() =>
+                            document.getElementById("cover-file-input")?.click()
+                          }
                         >
                           <Upload className="h-4 w-4 mr-2" />
                           Choose Image
@@ -493,7 +525,9 @@ export default function AdminUploadPage() {
                           type="button"
                           variant="outline"
                           className="mt-4"
-                          onClick={() => document.getElementById('audio-file-input')?.click()}
+                          onClick={() =>
+                            document.getElementById("audio-file-input")?.click()
+                          }
                         >
                           <Upload className="h-4 w-4 mr-2" />
                           Choose Audio

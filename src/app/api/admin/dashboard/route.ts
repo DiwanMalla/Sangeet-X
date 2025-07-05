@@ -16,7 +16,12 @@ export async function GET() {
     select: {
       id: true,
       title: true,
-      artist: true,
+      artist: {
+        select: {
+          id: true,
+          name: true,
+        },
+      },
       playCount: true,
       popularity: true,
       coverUrl: true,
@@ -31,7 +36,12 @@ export async function GET() {
     select: {
       id: true,
       title: true,
-      artist: true,
+      artist: {
+        select: {
+          id: true,
+          name: true,
+        },
+      },
       createdAt: true,
     },
   });

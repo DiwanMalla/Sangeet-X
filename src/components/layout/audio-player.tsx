@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import Image from "next/image";
 import { cn, formatTime } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -58,6 +58,75 @@ export default function AudioPlayer({
   const [isMuted, setIsMuted] = useState(false);
   const progressRef = useRef<HTMLDivElement>(null);
   const volumeRef = useRef<HTMLDivElement>(null);
+  const audioRef = useRef<HTMLAudioElement>(null);
+
+  // Audio event handlers
+  useEffect(() => {
+    const audio = audioRef.current;
+    if (!audio) return;
+
+    const handleTimeUpdate = () => {
+      onSeek(audio.currentTime);
+    };
+
+    const handleLoadedMetadata = () => {
+      // Duration will be set by the parent component
+    };
+
+    const handleEnded = () => {
+      onNext();
+    };
+
+    audio.addEventListener("timeupdate", handleTimeUpdate);
+    audio.addEventListener("loadedmetadata", handleLoadedMetadata);
+    audio.addEventListener("ended", handleEnded);
+
+    return () => {
+      audio.removeEventListener("timeupdate", handleTimeUpdate);
+      audio.removeEventListener("loadedmetadata", handleLoadedMetadata);
+      audio.removeEventListener("ended", handleEnded);
+    };
+  }, [onSeek, onNext]);
+
+  // Update audio source when song changes
+  useEffect(() => {
+    const audio = audioRef.current;
+    if (!audio || !currentSong) return;
+
+    audio.src = currentSong.audioUrl;
+    audio.load();
+  }, [currentSong]);
+
+  // Handle play/pause
+  useEffect(() => {
+    const audio = audioRef.current;
+    if (!audio) return;
+
+    if (isPlaying) {
+      audio.play().catch(console.error);
+    } else {
+      audio.pause();
+    }
+  }, [isPlaying]);
+
+  // Handle volume changes
+  useEffect(() => {
+    const audio = audioRef.current;
+    if (!audio) return;
+
+    audio.volume = volume;
+  }, [volume]);
+
+  // Handle seek changes
+  useEffect(() => {
+    const audio = audioRef.current;
+    if (!audio) return;
+
+    // Only seek if there's a significant difference to avoid loops
+    if (Math.abs(audio.currentTime - currentTime) > 1) {
+      audio.currentTime = currentTime;
+    }
+  }, [currentTime]);
 
   const handleProgressClick = (e: React.MouseEvent) => {
     if (progressRef.current && duration > 0) {
@@ -65,6 +134,12 @@ export default function AudioPlayer({
       const clickX = e.clientX - rect.left;
       const percentage = clickX / rect.width;
       const newTime = percentage * duration;
+
+      // Directly set the audio time
+      const audio = audioRef.current;
+      if (audio) {
+        audio.currentTime = newTime;
+      }
       onSeek(newTime);
     }
   };
@@ -95,6 +170,9 @@ export default function AudioPlayer({
 
   return (
     <div className="fixed bottom-0 left-0 right-0 z-50 bg-gray-900 border-t border-gray-800">
+      {/* Hidden audio element */}
+      <audio ref={audioRef} preload="metadata" crossOrigin="anonymous" />
+
       {/* Mobile Player */}
       <div className="lg:hidden">
         <div className="flex items-center justify-between p-4">
@@ -112,7 +190,7 @@ export default function AudioPlayer({
                 {currentSong.title}
               </p>
               <p className="text-xs text-gray-400 truncate">
-                {currentSong.artist}
+                {currentSong.artist?.name || "Unknown Artist"}
               </p>
             </div>
           </div>
@@ -279,7 +357,7 @@ export default function AudioPlayer({
                 {currentSong.title}
               </p>
               <p className="text-xs text-gray-400 truncate">
-                {currentSong.artist}
+                {currentSong.artist?.name || "Unknown Artist"}
               </p>
             </div>
             <Button
