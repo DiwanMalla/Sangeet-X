@@ -54,16 +54,19 @@ model Song {
   favorites    Favorite[]
   playHistory  PlayHistory[]
   playlists    PlaylistSong[]
+  subtitles    Subtitle[]
 
   @@map("songs")
 }
 
 model User {
-  id          String   @id @default(cuid())
+  id          String   @id // Using Clerk's user ID directly
   email       String   @unique
-  username    String   @unique
-  displayName String
-  avatar      String?
+  username    String?  @unique
+  firstName   String?
+  lastName    String?
+  displayName String?
+  imageUrl    String?
   isAdmin     Boolean  @default(false)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
@@ -146,4 +149,20 @@ model Genre {
   updatedAt   DateTime @updatedAt
 
   @@map("genres")
+}
+
+model Subtitle {
+  id        String   @id @default(cuid())
+  songId    String
+  language  String   // "english", "nepali", etc.
+  text      String
+  startTime Float    // in seconds
+  endTime   Float    // in seconds
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  song      Song     @relation(fields: [songId], references: [id], onDelete: Cascade)
+
+  @@map("subtitles")
 }

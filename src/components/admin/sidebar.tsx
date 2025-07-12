@@ -10,6 +10,7 @@ import {
   Settings,
   LogOut,
   Mic,
+  Languages,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -18,6 +19,7 @@ const navigation = [
   { name: "Upload Song", href: "/admin/upload", icon: Upload },
   { name: "Manage Songs", href: "/admin/songs", icon: Music },
   { name: "Manage Artists", href: "/admin/artists", icon: Mic },
+  { name: "Subtitles", href: "/admin/subtitles", icon: Languages },
   { name: "Manage Users", href: "/admin/users", icon: Users },
   { name: "Analytics", href: "/admin/analytics", icon: BarChart3 },
   { name: "Settings", href: "/admin/settings", icon: Settings },

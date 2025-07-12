@@ -193,3 +193,219 @@ body {
     display: none;
   }
 }
+
+/* Custom Clerk Styles for SangeetX */
+
+/* Override Clerk's default background and text colors */
+.cl-card {
+  background: rgba(255, 255, 255, 0.1) !important;
+  backdrop-filter: blur(16px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25) !important;
+}
+
+.cl-headerTitle {
+  color: white !important;
+  font-size: 1.5rem !important;
+  font-weight: 700 !important;
+}
+
+.cl-headerSubtitle {
+  color: rgba(196, 181, 253, 1) !important;
+}
+
+.cl-socialButtonsBlockButton {
+  background: rgba(255, 255, 255, 0.1) !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  color: white !important;
+  transition: all 0.2s ease !important;
+}
+
+.cl-socialButtonsBlockButton:hover {
+  background: rgba(255, 255, 255, 0.2) !important;
+}
+
+.cl-formFieldInput {
+  background: rgba(255, 255, 255, 0.1) !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  color: white !important;
+}
+
+.cl-formFieldInput::placeholder {
+  color: rgba(196, 181, 253, 1) !important;
+}
+
+.cl-formFieldInput:focus {
+  border-color: rgb(168, 85, 247) !important;
+  box-shadow: 0 0 0 1px rgb(168, 85, 247) !important;
+}
+
+.cl-formFieldLabel {
+  color: white !important;
+  font-weight: 500 !important;
+}
+
+.cl-formButtonPrimary {
+  background: linear-gradient(
+    to right,
+    rgb(168, 85, 247),
+    rgb(236, 72, 153)
+  ) !important;
+  color: white !important;
+  font-weight: 600 !important;
+  border-radius: 0.5rem !important;
+  transition: all 0.3s ease !important;
+  box-shadow: 0 10px 25px -5px rgba(168, 85, 247, 0.25) !important;
+}
+
+.cl-formButtonPrimary:hover {
+  background: linear-gradient(
+    to right,
+    rgb(147, 51, 234),
+    rgb(219, 39, 119)
+  ) !important;
+  box-shadow: 0 20px 35px -10px rgba(168, 85, 247, 0.35) !important;
+  transform: translateY(-1px) !important;
+}
+
+.cl-footerActionLink {
+  color: rgba(196, 181, 253, 1) !important;
+}
+
+.cl-footerActionLink:hover {
+  color: white !important;
+}
+
+.cl-dividerLine {
+  background: rgba(255, 255, 255, 0.2) !important;
+}
+
+.cl-dividerText {
+  color: rgba(196, 181, 253, 1) !important;
+}
+
+.cl-formFieldInputShowPasswordButton {
+  color: rgba(168, 85, 247, 1) !important;
+}
+
+.cl-formFieldInputShowPasswordButton:hover {
+  color: white !important;
+}
+
+.cl-identityPreviewText {
+  color: white !important;
+}
+
+.cl-identityPreviewEditButton {
+  color: rgba(196, 181, 253, 1) !important;
+}
+
+.cl-identityPreviewEditButton:hover {
+  color: white !important;
+}
+
+/* User Profile specific styles */
+.cl-navbar {
+  background: rgba(31, 41, 55, 0.5) !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+}
+
+.cl-navbarButton {
+  color: rgba(209, 213, 219, 1) !important;
+}
+
+.cl-navbarButton:hover {
+  color: white !important;
+  background: rgba(55, 65, 81, 0.5) !important;
+}
+
+.cl-navbarButtonActive {
+  background: rgb(168, 85, 247) !important;
+  color: white !important;
+}
+
+.cl-accordionTriggerButton {
+  color: white !important;
+}
+
+.cl-accordionTriggerButton:hover {
+  color: rgba(196, 181, 253, 1) !important;
+}
+
+.cl-accordionContent {
+  color: rgba(209, 213, 219, 1) !important;
+}
+
+.cl-badge {
+  background: rgb(168, 85, 247) !important;
+  color: white !important;
+}
+
+/* Loading spinner styles */
+.cl-spinner {
+  border-color: rgba(255, 255, 255, 0.3) !important;
+  border-top-color: rgb(168, 85, 247) !important;
+}
+
+/* Error messages */
+.cl-formFieldErrorText {
+  color: rgb(248, 113, 113) !important;
+}
+
+/* Success messages */
+.cl-formFieldSuccessText {
+  color: rgb(34, 197, 94) !important;
+}
+
+/* Custom Audio Progress Slider */
+.slider {
+  outline: none;
+}
+
+.slider::-webkit-slider-thumb {
+  appearance: none;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #ffffff;
+  cursor: pointer;
+  border: 2px solid rgba(255, 255, 255, 0.8);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+  transition: all 0.2s ease;
+}
+
+.slider::-webkit-slider-thumb:hover {
+  background: #f0f0f0;
+  transform: scale(1.1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+}
+
+.slider::-webkit-slider-track {
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 3px;
+  height: 6px;
+}
+
+.slider::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #ffffff;
+  cursor: pointer;
+  border: 2px solid rgba(255, 255, 255, 0.8);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+  transition: all 0.2s ease;
+}
+
+.slider::-moz-range-thumb:hover {
+  background: #f0f0f0;
+  transform: scale(1.1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+}
+
+.slider::-moz-range-track {
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 4px;
+  height: 8px;
+  border: none;
+}

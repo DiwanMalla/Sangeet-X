@@ -1,0 +1,29 @@
+{
+  "name": "SangeetX - Modern Music Streaming Platform",
+  "short_name": "SangeetX",
+  "description": "Discover, play, and enjoy music with SangeetX - a modern, responsive music streaming platform.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#1e1b4b",
+  "theme_color": "#8b5cf6",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/favicon.ico",
+      "sizes": "16x16 32x32 48x48",
+      "type": "image/x-icon"
+    },
+    {
+      "src": "/android-chrome-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/android-chrome-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ],
+  "categories": ["music", "entertainment", "multimedia"],
+  "lang": "en"
+}

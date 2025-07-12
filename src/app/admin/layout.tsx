@@ -40,6 +40,7 @@ const adminNavItems = [
     href: "/admin/artists",
     icon: Mic,
   },
+  { name: "Subtitles", href: "/admin/subtitles", icon: BarChart3 },
   {
     name: "Upload",
     href: "/admin/upload",

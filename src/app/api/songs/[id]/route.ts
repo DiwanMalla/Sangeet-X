@@ -59,6 +59,9 @@ export async function GET(
 
     const song = await prisma.song.findUnique({
       where: { id: songId },
+      include: {
+        artist: true,
+      },
     });
 
     if (!song) {
@@ -106,7 +109,7 @@ export async function PUT(
       where: { id: songId },
       data: {
         title: updateData.title || existingSong.title,
-        artist: updateData.artist || existingSong.artist,
+        artistId: updateData.artistId || existingSong.artistId,
         album: updateData.album || existingSong.album,
         genre: updateData.genre || existingSong.genre,
         year: updateData.year || existingSong.year,
@@ -116,6 +119,9 @@ export async function PUT(
         popularity: updateData.popularity ?? existingSong.popularity,
         playCount: updateData.playCount ?? existingSong.playCount,
         isLiked: updateData.isLiked ?? existingSong.isLiked,
+      },
+      include: {
+        artist: true,
       },
     });
 

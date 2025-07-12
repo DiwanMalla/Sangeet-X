@@ -1,7 +1,9 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import Image from "next/image";
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
@@ -16,10 +18,13 @@ import {
   Music2,
   PlayCircle,
 } from "lucide-react";
-import { Song, Artist, Genre } from "@/lib/types";
+import { Song, Genre } from "@/lib/types";
 import { cn, formatTime } from "@/lib/utils";
+import { useUser } from "@clerk/nextjs";
 
 export default function HomePage() {
+  const router = useRouter();
+  const { isSignedIn, isLoaded } = useUser();
   const [currentSong, setCurrentSong] = useState<Song | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [volume, setVolume] = useState(0.7);
@@ -33,10 +38,18 @@ export default function HomePage() {
   const [queue, setQueue] = useState<Song[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [songs, setSongs] = useState<Song[]>([]);
-  const [artists, setArtists] = useState<Artist[]>([]);
   const [genres, setGenres] = useState<Genre[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  // Check authentication status
+  useEffect(() => {
+    if (!isLoaded) return; // Wait for Clerk to load
+
+    if (!isSignedIn) {
+      router.push("/landing");
+    }
+  }, [isSignedIn, isLoaded, router]);
 
   // Fetch data from API
   useEffect(() => {
@@ -57,7 +70,6 @@ export default function HomePage() {
 
         if (popularData.success) {
           setSongs(popularData.data.songs);
-          setArtists(popularData.data.artists);
           setGenres(popularData.data.genres);
         }
 
@@ -137,6 +149,20 @@ export default function HomePage() {
       setCurrentTime(0);
     }
   }, [currentSong]);
+
+  // Don't render anything until Clerk is loaded
+  if (!isLoaded) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center">
+        <div className="w-8 h-8 border-2 border-purple-500 border-t-transparent rounded-full animate-spin"></div>
+      </div>
+    );
+  }
+
+  // Only render home content if authenticated
+  if (!isSignedIn) {
+    return null; // Will redirect to landing
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
@@ -233,9 +259,11 @@ export default function HomePage() {
                               </div>
                             </div>
                             <div className="flex-1 min-w-0">
-                              <h3 className="font-semibold text-gray-900 dark:text-white truncate">
-                                {song.title}
-                              </h3>
+                              <Link href={`/song/${song.id}`} className="block">
+                                <h3 className="font-semibold text-gray-900 dark:text-white truncate hover:text-purple-600 dark:hover:text-purple-400 transition-colors cursor-pointer">
+                                  {song.title}
+                                </h3>
+                              </Link>
                               <p className="text-sm text-gray-500 dark:text-gray-400 truncate">
                                 {song.artist?.name || "Unknown Artist"}
                               </p>
@@ -329,9 +357,11 @@ export default function HomePage() {
                           />
                         </div>
                         <div className="flex-1 min-w-0">
-                          <h3 className="font-medium text-gray-900 dark:text-white truncate">
-                            {song.title}
-                          </h3>
+                          <Link href={`/song/${song.id}`} className="block">
+                            <h3 className="font-medium text-gray-900 dark:text-white truncate hover:text-purple-600 dark:hover:text-purple-400 transition-colors cursor-pointer">
+                              {song.title}
+                            </h3>
+                          </Link>
                           <p className="text-sm text-gray-500 dark:text-gray-400 truncate">
                             {song.artist?.name || "Unknown Artist"}
                           </p>

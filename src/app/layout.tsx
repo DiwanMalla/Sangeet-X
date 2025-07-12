@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
+import AppLayout from "@/components/layout/app-layout";
+import { ClerkProvider } from "@clerk/nextjs";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -65,9 +67,28 @@ export default function RootLayout({
         />
       </head>
       <body className={inter.className}>
-        <div className="min-h-screen bg-background text-foreground">
-          {children}
-        </div>
+        <ClerkProvider
+          publishableKey={process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY}
+          signInUrl="/login"
+          signUpUrl="/sign-up"
+          afterSignInUrl="/"
+          afterSignUpUrl="/"
+          appearance={{
+            baseTheme: undefined,
+            variables: {
+              colorPrimary: "#8B5CF6",
+              colorBackground: "#0F172A",
+              colorInputBackground: "#1E293B",
+              colorInputText: "#F8FAFC",
+            },
+          }}
+        >
+          <AppLayout>
+            <div className="min-h-screen bg-background text-foreground">
+              {children}
+            </div>
+          </AppLayout>
+        </ClerkProvider>
       </body>
     </html>
   );

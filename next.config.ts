@@ -7,6 +7,7 @@ const nextConfig: NextConfig = {
       "cdn.sangeetx.com",
       "localhost",
       "res.cloudinary.com",
+      "img.clerk.com",
     ],
     formats: ["image/webp", "image/avif"],
   },
