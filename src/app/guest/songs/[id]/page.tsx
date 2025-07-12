@@ -244,9 +244,8 @@ export default function GuestSongPage() {
                 </div>
               </div>
 
-              {/* Artist Info and Share Thoughts */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {/* Artist Info */}
+              {/* Artist Info */}
+              <div className="grid grid-cols-1 gap-6">
                 <div>
                   <h3 className="text-lg font-semibold text-foreground mb-2">
                     Artist
@@ -272,29 +271,6 @@ export default function GuestSongPage() {
                       </p>
                       <p className="text-muted-foreground text-sm">Artist</p>
                     </div>
-                  </div>
-                </div>
-
-                {/* Share Thoughts */}
-                <div>
-                  <h3 className="text-lg font-semibold text-foreground mb-2">
-                    Share Your Thoughts
-                  </h3>
-                  <div className="space-y-3">
-                    <textarea
-                      value={thought}
-                      onChange={(e) => setThought(e.target.value)}
-                      placeholder="What do you think about this song?"
-                      className="w-full p-3 bg-muted/50 border border-border rounded-lg text-foreground placeholder-muted-foreground focus:outline-none focus:border-primary resize-none"
-                      rows={3}
-                    />
-                    <button
-                      onClick={handleLoginRedirect}
-                      className="flex items-center space-x-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors"
-                    >
-                      <LogIn size={16} />
-                      <span>Login to Share</span>
-                    </button>
                   </div>
                 </div>
               </div>
@@ -342,6 +318,29 @@ export default function GuestSongPage() {
                 <button className="flex items-center space-x-2 text-muted-foreground hover:text-foreground transition-colors">
                   <Share2 size={16} />
                   <span>Share</span>
+                </button>
+              </div>
+            </div>
+
+            {/* Share Your Thoughts */}
+            <div className="bg-card backdrop-blur-sm rounded-xl p-6">
+              <h3 className="text-lg font-semibold text-foreground mb-4">
+                Share Your Thoughts
+              </h3>
+              <div className="space-y-3">
+                <textarea
+                  value={thought}
+                  onChange={(e) => setThought(e.target.value)}
+                  placeholder="What do you think about this song?"
+                  className="w-full p-3 bg-muted/50 border border-border rounded-lg text-foreground placeholder-muted-foreground focus:outline-none focus:border-primary resize-none"
+                  rows={4}
+                />
+                <button
+                  onClick={handleLoginRedirect}
+                  className="flex items-center space-x-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors"
+                >
+                  <LogIn size={16} />
+                  <span>Login to Share</span>
                 </button>
               </div>
             </div>
