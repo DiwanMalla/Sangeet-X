@@ -3,9 +3,10 @@ import { prisma } from "@/lib/prisma";
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const body = await request.json();
     const { songId } = body;
 
@@ -20,7 +21,7 @@ export async function POST(
     const existingSong = await prisma.playlistSong.findUnique({
       where: {
         playlistId_songId: {
-          playlistId: params.id,
+          playlistId: id,
           songId,
         },
       },
@@ -35,7 +36,7 @@ export async function POST(
 
     // Get the current highest position
     const lastSong = await prisma.playlistSong.findFirst({
-      where: { playlistId: params.id },
+      where: { playlistId: id },
       orderBy: { position: "desc" },
     });
 
@@ -43,7 +44,7 @@ export async function POST(
 
     const playlistSong = await prisma.playlistSong.create({
       data: {
-        playlistId: params.id,
+        playlistId: id,
         songId,
         position,
       },
@@ -71,9 +72,10 @@ export async function POST(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const { searchParams } = new URL(request.url);
     const songId = searchParams.get("songId");
 
@@ -87,7 +89,7 @@ export async function DELETE(
     await prisma.playlistSong.delete({
       where: {
         playlistId_songId: {
-          playlistId: params.id,
+          playlistId: id,
           songId,
         },
       },

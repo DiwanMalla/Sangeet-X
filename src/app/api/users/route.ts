@@ -9,7 +9,7 @@ export async function GET() {
         username: true,
         displayName: true,
         email: true,
-        avatar: true,
+        imageUrl: true,
         isAdmin: true,
         createdAt: true,
       },
@@ -46,10 +46,11 @@ export async function POST(request: NextRequest) {
 
     const user = await prisma.user.create({
       data: {
+        id: `manual_user_${Date.now()}_${Math.random().toString(36).substring(2)}`,
         email,
         username,
         displayName,
-        avatar,
+        imageUrl: avatar,
       },
     });
 

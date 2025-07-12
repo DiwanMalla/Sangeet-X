@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
@@ -62,7 +62,6 @@ export default function SongPage() {
   const [playlists, setPlaylists] = useState<Playlist[]>([]);
   const [showCreatePlaylist, setShowCreatePlaylist] = useState(false);
   const [newPlaylistName, setNewPlaylistName] = useState("");
-  const menuRef = useRef<HTMLDivElement>(null);
 
   // Mock user ID - in a real app, this would come from authentication
   const mockUserId = "mock-user-id";

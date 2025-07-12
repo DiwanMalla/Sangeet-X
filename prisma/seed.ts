@@ -71,6 +71,7 @@ async function main() {
   const users = await Promise.all([
     prisma.user.create({
       data: {
+        id: "user_admin_seed_id",
         email: "admin@sangeetx.com",
         username: "admin",
         displayName: "Admin User",
@@ -79,6 +80,7 @@ async function main() {
     }),
     prisma.user.create({
       data: {
+        id: "user_john_seed_id",
         email: "john@example.com",
         username: "john_doe",
         displayName: "John Doe",
@@ -87,6 +89,7 @@ async function main() {
     }),
     prisma.user.create({
       data: {
+        id: "user_jane_seed_id",
         email: "jane@example.com",
         username: "jane_smith",
         displayName: "Jane Smith",

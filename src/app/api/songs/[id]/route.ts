@@ -3,10 +3,11 @@ import { prisma } from "@/lib/prisma";
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const songId = params.id;
+    const { id } = await params;
+    const songId = id;
 
     // Find the song first to get the URLs for Cloudinary cleanup
     const song = await prisma.song.findUnique({
@@ -52,10 +53,11 @@ export async function DELETE(
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const songId = params.id;
+    const { id } = await params;
+    const songId = id;
 
     const song = await prisma.song.findUnique({
       where: { id: songId },
@@ -86,10 +88,11 @@ export async function GET(
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const songId = params.id;
+    const { id } = await params;
+    const songId = id;
     const updateData = await request.json();
 
     // Check if song exists

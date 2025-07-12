@@ -19,10 +19,11 @@ export async function POST() {
     // Create default user
     const defaultUser = await prisma.user.create({
       data: {
+        id: "default_user_init",
         email: "user@sangeetx.com",
         username: "defaultuser",
         displayName: "Default User",
-        avatar: null,
+        imageUrl: null,
         isAdmin: false,
       },
     });

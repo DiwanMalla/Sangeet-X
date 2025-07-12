@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import GuestNavbar from "@/components/common/guest-navbar";
 import { Play, Clock, Eye, Music, Grid, List } from "lucide-react";
@@ -44,7 +44,7 @@ interface GenreData {
   };
 }
 
-export default function GuestGenrePage() {
+function GuestGenreContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const [genreData, setGenreData] = useState<GenreData | null>(null);
@@ -386,5 +386,19 @@ export default function GuestGenrePage() {
         )}
       </div>
     </div>
+  );
+}
+
+export default function GuestGenrePage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen bg-background flex items-center justify-center">
+          <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
+        </div>
+      }
+    >
+      <GuestGenreContent />
+    </Suspense>
   );
 }

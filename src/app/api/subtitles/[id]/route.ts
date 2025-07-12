@@ -3,10 +3,11 @@ import { prisma } from "@/lib/prisma";
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const subtitleId = params.id;
+    const { id } = await params;
+    const subtitleId = id;
 
     const subtitle = await prisma.subtitle.findUnique({
       where: { id: subtitleId },
@@ -41,10 +42,11 @@ export async function GET(
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const subtitleId = params.id;
+    const { id } = await params;
+    const subtitleId = id;
     const data = await request.json();
     const { songId, language, text, startTime, endTime } = data;
 
@@ -96,10 +98,11 @@ export async function PUT(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const subtitleId = params.id;
+    const { id } = await params;
+    const subtitleId = id;
 
     // Check if subtitle exists
     const subtitle = await prisma.subtitle.findUnique({

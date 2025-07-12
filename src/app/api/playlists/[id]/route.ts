@@ -3,11 +3,12 @@ import { prisma } from "@/lib/prisma";
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const playlist = await prisma.playlist.findUnique({
-      where: { id: params.id },
+      where: { id },
       include: {
         songs: {
           include: {
@@ -24,7 +25,6 @@ export async function GET(
             id: true,
             username: true,
             displayName: true,
-            avatar: true,
           },
         },
         _count: {
@@ -55,14 +55,15 @@ export async function GET(
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const body = await request.json();
     const { name, description, isPublic } = body;
 
     const playlist = await prisma.playlist.update({
-      where: { id: params.id },
+      where: { id },
       data: {
         name,
         description,
@@ -100,11 +101,12 @@ export async function PUT(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     await prisma.playlist.delete({
-      where: { id: params.id },
+      where: { id },
     });
 
     return NextResponse.json({
