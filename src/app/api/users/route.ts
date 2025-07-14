@@ -46,7 +46,9 @@ export async function POST(request: NextRequest) {
 
     const user = await prisma.user.create({
       data: {
-        id: `manual_user_${Date.now()}_${Math.random().toString(36).substring(2)}`,
+        id: `manual_user_${Date.now()}_${Math.random()
+          .toString(36)
+          .substring(2)}`,
         email,
         username,
         displayName,

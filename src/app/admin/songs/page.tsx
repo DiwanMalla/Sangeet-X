@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -16,6 +16,11 @@ import {
   Eye,
   Clock,
   Download,
+  X,
+  Save,
+  Loader2,
+  ImagePlus,
+  ImageIcon,
 } from "lucide-react";
 import Link from "next/link";
 import { Song } from "@/lib/types";
@@ -26,6 +31,22 @@ interface SongStats {
   totalPlays: number;
   totalLikes: number;
   totalSize: string;
+}
+
+interface EditSongData {
+  title: string;
+  artistId: string;
+  album: string;
+  genre: string;
+  year: number | null;
+  duration: number;
+  coverUrl: string;
+  audioUrl: string;
+}
+
+interface Artist {
+  id: string;
+  name: string;
 }
 
 export default function AdminSongsPage() {
@@ -45,6 +66,25 @@ export default function AdminSongsPage() {
     totalLikes: 0,
     totalSize: "0 MB",
   });
+
+  // Edit modal states
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [editingSong, setEditingSong] = useState<Song | null>(null);
+  const [editFormData, setEditFormData] = useState<EditSongData>({
+    title: "",
+    artistId: "",
+    album: "",
+    genre: "",
+    year: null,
+    duration: 0,
+    coverUrl: "",
+    audioUrl: "",
+  });
+  const [artists, setArtists] = useState<Artist[]>([]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const genres = [
     "all",
@@ -86,6 +126,18 @@ export default function AdminSongsPage() {
       console.error("Error fetching songs:", error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchArtists = async () => {
+    try {
+      const response = await fetch("/api/artists");
+      if (response.ok) {
+        const data = await response.json();
+        setArtists(data.data || []);
+      }
+    } catch (error) {
+      console.error("Error fetching artists:", error);
     }
   };
 
@@ -148,11 +200,150 @@ export default function AdminSongsPage() {
 
   useEffect(() => {
     fetchSongs();
+    fetchArtists();
   }, []);
 
   useEffect(() => {
     filterAndSortSongs();
   }, [filterAndSortSongs]);
+
+  const handleEditSong = (song: Song) => {
+    setEditingSong(song);
+    setEditFormData({
+      title: song.title,
+      artistId: song.artist?.id || "",
+      album: song.album || "",
+      genre: song.genre || "",
+      year: song.year || null,
+      duration: song.duration,
+      coverUrl: song.coverUrl,
+      audioUrl: song.audioUrl,
+    });
+    setImagePreview(song.coverUrl);
+    setImageFile(null);
+    setIsEditModalOpen(true);
+  };
+
+  const handleCloseEditModal = () => {
+    setIsEditModalOpen(false);
+    setEditingSong(null);
+    setEditFormData({
+      title: "",
+      artistId: "",
+      album: "",
+      genre: "",
+      year: null,
+      duration: 0,
+      coverUrl: "",
+      audioUrl: "",
+    });
+    setImagePreview(null);
+    setImageFile(null);
+  };
+
+  const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      setImageFile(file);
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setImagePreview(e.target?.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleRemoveImage = () => {
+    setImageFile(null);
+    setImagePreview(null);
+    setEditFormData((prev) => ({ ...prev, coverUrl: "" }));
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+  };
+
+  const uploadImageToCloudinary = async (file: File): Promise<string> => {
+    const formData = new FormData();
+    formData.append("file", file);
+
+    const response = await fetch("/api/upload/image", {
+      method: "POST",
+      body: formData,
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.error || "Failed to upload image");
+    }
+
+    const data = await response.json();
+    return data.data.url;
+  };
+
+  const handleSaveEdit = async () => {
+    if (!editingSong) return;
+
+    setIsSubmitting(true);
+    try {
+      let coverUrl = editFormData.coverUrl;
+
+      // Upload new image if selected
+      if (imageFile) {
+        try {
+          coverUrl = await uploadImageToCloudinary(imageFile);
+        } catch (uploadError) {
+          console.error("Image upload error:", uploadError);
+          alert(
+            `Failed to upload image: ${
+              uploadError instanceof Error
+                ? uploadError.message
+                : "Unknown error"
+            }`
+          );
+          setIsSubmitting(false);
+          return;
+        }
+      }
+
+      const updateData = {
+        ...editFormData,
+        coverUrl,
+        year: editFormData.year || null,
+      };
+
+      const response = await fetch(`/api/songs/${editingSong.id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(updateData),
+      });
+
+      if (response.ok) {
+        const updatedSong = await response.json();
+        setSongs((prev) =>
+          prev.map((song) =>
+            song.id === editingSong.id ? updatedSong.data : song
+          )
+        );
+        handleCloseEditModal();
+        // Show success message
+        alert("Song updated successfully!");
+      } else {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Failed to update song");
+      }
+    } catch (error) {
+      console.error("Error updating song:", error);
+      alert(
+        `Failed to update song: ${
+          error instanceof Error ? error.message : "Unknown error"
+        }`
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   const handleDeleteSong = async (songId: string) => {
     if (confirm("Are you sure you want to delete this song?")) {
@@ -481,7 +672,12 @@ export default function AdminSongsPage() {
                     <Button variant="ghost" size="icon" className="h-8 w-8">
                       <Eye className="h-4 w-4" />
                     </Button>
-                    <Button variant="ghost" size="icon" className="h-8 w-8">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8"
+                      onClick={() => handleEditSong(song)}
+                    >
                       <Edit className="h-4 w-4" />
                     </Button>
                     <Button
@@ -521,6 +717,284 @@ export default function AdminSongsPage() {
           )}
         </CardContent>
       </Card>
+
+      {/* Edit Song Modal */}
+      {isEditModalOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white dark:bg-gray-900 rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="p-6 border-b border-gray-200 dark:border-gray-700">
+              <div className="flex items-center justify-between">
+                <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
+                  Edit Song
+                </h2>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={handleCloseEditModal}
+                  className="text-gray-500 hover:text-gray-700"
+                >
+                  <X className="h-5 w-5" />
+                </Button>
+              </div>
+            </div>
+
+            <div className="p-6 space-y-6">
+              {/* Cover Image Section */}
+              <div className="space-y-4">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                  Cover Image
+                </label>
+
+                {/* Image Preview */}
+                <div className="flex items-start space-x-4">
+                  <div className="relative">
+                    <div className="w-32 h-32 rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-800 border-2 border-dashed border-gray-300 dark:border-gray-600">
+                      {imagePreview ? (
+                        <Image
+                          src={imagePreview}
+                          alt="Cover preview"
+                          fill
+                          className="object-cover"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center">
+                          <ImageIcon className="h-8 w-8 text-gray-400" />
+                        </div>
+                      )}
+                    </div>
+                    {imagePreview && (
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="absolute -top-2 -right-2 h-6 w-6 rounded-full bg-red-500 hover:bg-red-600 text-white"
+                        onClick={handleRemoveImage}
+                      >
+                        <X className="h-3 w-3" />
+                      </Button>
+                    )}
+                  </div>
+
+                  {/* Upload Options */}
+                  <div className="flex-1 space-y-3">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => fileInputRef.current?.click()}
+                      className="w-full"
+                    >
+                      <ImagePlus className="h-4 w-4 mr-2" />
+                      {imagePreview ? "Change Image" : "Upload Image"}
+                    </Button>
+
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      accept="image/*"
+                      onChange={handleImageUpload}
+                      className="hidden"
+                    />
+
+                    <div className="text-center text-sm text-gray-500 dark:text-gray-400">
+                      or
+                    </div>
+
+                    <Input
+                      value={editFormData.coverUrl}
+                      onChange={(e) => {
+                        setEditFormData((prev) => ({
+                          ...prev,
+                          coverUrl: e.target.value,
+                        }));
+                        setImagePreview(e.target.value);
+                        setImageFile(null);
+                      }}
+                      placeholder="Enter image URL"
+                      className="text-sm"
+                    />
+
+                    <p className="text-xs text-gray-500 dark:text-gray-400">
+                      Upload a file or enter an image URL. Recommended:
+                      300x300px, JPEG or PNG
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Form Fields */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="md:col-span-2">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Song Title *
+                  </label>
+                  <Input
+                    value={editFormData.title}
+                    onChange={(e) =>
+                      setEditFormData((prev) => ({
+                        ...prev,
+                        title: e.target.value,
+                      }))
+                    }
+                    placeholder="Enter song title"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Artist *
+                  </label>
+                  <select
+                    value={editFormData.artistId}
+                    onChange={(e) =>
+                      setEditFormData((prev) => ({
+                        ...prev,
+                        artistId: e.target.value,
+                      }))
+                    }
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+                    required
+                  >
+                    <option value="">Select an artist</option>
+                    {artists.map((artist) => (
+                      <option key={artist.id} value={artist.id}>
+                        {artist.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Album
+                  </label>
+                  <Input
+                    value={editFormData.album}
+                    onChange={(e) =>
+                      setEditFormData((prev) => ({
+                        ...prev,
+                        album: e.target.value,
+                      }))
+                    }
+                    placeholder="Enter album name"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Genre
+                  </label>
+                  <select
+                    value={editFormData.genre}
+                    onChange={(e) =>
+                      setEditFormData((prev) => ({
+                        ...prev,
+                        genre: e.target.value,
+                      }))
+                    }
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+                  >
+                    <option value="">Select genre</option>
+                    {genres
+                      .filter((g) => g !== "all")
+                      .map((genre) => (
+                        <option key={genre} value={genre}>
+                          {genre}
+                        </option>
+                      ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Year
+                  </label>
+                  <Input
+                    type="number"
+                    value={editFormData.year || ""}
+                    onChange={(e) =>
+                      setEditFormData((prev) => ({
+                        ...prev,
+                        year: e.target.value ? parseInt(e.target.value) : null,
+                      }))
+                    }
+                    placeholder="Enter release year"
+                    min="1900"
+                    max={new Date().getFullYear()}
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Duration (seconds) *
+                  </label>
+                  <Input
+                    type="number"
+                    value={editFormData.duration}
+                    onChange={(e) =>
+                      setEditFormData((prev) => ({
+                        ...prev,
+                        duration: parseInt(e.target.value) || 0,
+                      }))
+                    }
+                    placeholder="Enter duration in seconds"
+                    min="1"
+                    required
+                  />
+                </div>
+
+                <div className="md:col-span-2">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Audio URL *
+                  </label>
+                  <Input
+                    value={editFormData.audioUrl}
+                    onChange={(e) =>
+                      setEditFormData((prev) => ({
+                        ...prev,
+                        audioUrl: e.target.value,
+                      }))
+                    }
+                    placeholder="Enter audio file URL"
+                    required
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div className="p-6 border-t border-gray-200 dark:border-gray-700 flex justify-end space-x-3">
+              <Button
+                variant="outline"
+                onClick={handleCloseEditModal}
+                disabled={isSubmitting}
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={handleSaveEdit}
+                disabled={
+                  isSubmitting ||
+                  !editFormData.title ||
+                  !editFormData.artistId ||
+                  !editFormData.audioUrl
+                }
+                className="min-w-[100px]"
+              >
+                {isSubmitting ? (
+                  <>
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    Saving...
+                  </>
+                ) : (
+                  <>
+                    <Save className="h-4 w-4 mr-2" />
+                    Save Changes
+                  </>
+                )}
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

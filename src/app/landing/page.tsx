@@ -36,6 +36,9 @@ interface Song {
   artist: { name: string; id: string };
   playCount: number;
   duration: number;
+  coverUrl: string;
+  album?: string;
+  year?: number;
 }
 
 interface Artist {
@@ -272,17 +275,24 @@ export default function LandingPage() {
                     >
                       <CardContent className="p-4">
                         <div className="flex items-center space-x-4">
+                          {/* Rank skeleton */}
                           <div className="w-8 h-8 bg-white/10 rounded flex items-center justify-center">
-                            <span className="text-white/50">#{index + 1}</span>
+                            <span className="text-white/50 text-sm">
+                              #{index + 1}
+                            </span>
                           </div>
-                          <div className="w-12 h-12 bg-gradient-to-br from-purple-500/50 to-pink-500/50 rounded-lg flex items-center justify-center">
-                            <Music className="w-6 h-6 text-white/50" />
-                          </div>
+                          {/* Thumbnail skeleton */}
+                          <div className="w-12 h-12 bg-white/10 rounded-lg"></div>
+                          {/* Song info skeleton */}
                           <div className="flex-1">
                             <div className="h-5 bg-white/10 rounded mb-2 w-32"></div>
                             <div className="h-4 bg-white/5 rounded w-24"></div>
                           </div>
-                          <div className="w-8 h-4 bg-white/5 rounded"></div>
+                          {/* Duration skeleton */}
+                          <div className="w-10 h-4 bg-white/5 rounded"></div>
+                          {/* Play count skeleton */}
+                          <div className="w-8 h-4 bg-white/5 rounded hidden sm:block"></div>
+                          {/* Play button skeleton */}
                           <div className="w-6 h-6 bg-white/5 rounded-full"></div>
                         </div>
                       </CardContent>
@@ -292,29 +302,64 @@ export default function LandingPage() {
                   popularSongs.map((song, index) => (
                     <Card
                       key={song.id}
-                      className="bg-white/5 border-white/10 hover:bg-white/10 transition-all duration-300 cursor-pointer"
+                      className="bg-white/5 border-white/10 hover:bg-white/10 transition-all duration-300 cursor-pointer group"
                       onClick={() => router.push(`/guest/songs/${song.id}`)}
                     >
                       <CardContent className="p-4">
                         <div className="flex items-center space-x-4">
-                          <div className="w-8 h-8 text-purple-400 font-bold flex items-center justify-center">
+                          {/* Rank Number */}
+                          <div className="w-8 h-8 text-purple-400 font-bold flex items-center justify-center text-sm">
                             #{index + 1}
                           </div>
-                          <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-pink-500 rounded-lg flex items-center justify-center">
-                            <Music className="w-6 h-6 text-white" />
+
+                          {/* Song Thumbnail */}
+                          <div className="relative">
+                            <Image
+                              src={
+                                song.coverUrl ||
+                                "https://via.placeholder.com/48x48/6b46c1/ffffff?text=♪"
+                              }
+                              alt={song.title}
+                              width={48}
+                              height={48}
+                              className="w-12 h-12 object-cover rounded-lg"
+                            />
+                            <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity rounded-lg flex items-center justify-center">
+                              <Play className="w-4 h-4 text-white" />
+                            </div>
                           </div>
-                          <div className="flex-1">
-                            <h3 className="text-white font-semibold">
+
+                          {/* Song Info */}
+                          <div className="flex-1 min-w-0">
+                            <h3 className="text-white font-semibold truncate">
                               {song.title}
                             </h3>
-                            <p className="text-purple-300 text-sm">
+                            <p className="text-purple-300 text-sm truncate">
                               {song.artist.name}
+                              {song.album && (
+                                <span className="text-purple-400">
+                                  {" "}
+                                  • {song.album}
+                                </span>
+                              )}
                             </p>
                           </div>
-                          <div className="text-purple-400 text-sm">
-                            {Math.floor(song.playCount / 1000)}K
+
+                          {/* Duration */}
+                          <div className="text-purple-400 text-sm font-mono">
+                            {Math.floor(song.duration / 60)}:
+                            {(song.duration % 60).toString().padStart(2, "0")}
                           </div>
-                          <PlayCircle className="w-6 h-6 text-purple-400 hover:text-white transition-colors" />
+
+                          {/* Play Count */}
+                          <div className="text-purple-400 text-sm hidden sm:block">
+                            {song.playCount >= 1000
+                              ? `${Math.floor(song.playCount / 1000)}K`
+                              : song.playCount}
+                          </div>
+
+                          {/* Play Button */}
+                          <PlayCircle className="w-6 h-6 text-purple-400 hover:text-white transition-colors opacity-70 group-hover:opacity-100" />
                         </div>
                       </CardContent>
                     </Card>
@@ -490,7 +535,7 @@ export default function LandingPage() {
                   <div className="space-y-4">
                     <div>
                       <h4 className="text-white font-semibold mb-2">
-                        Dipin Malla
+                        Diwan Malla
                       </h4>
                       <div className="flex items-center text-purple-300 mb-2">
                         <MapPin className="w-4 h-4 mr-2" />
@@ -539,7 +584,7 @@ export default function LandingPage() {
                         <span>Portfolio</span>
                       </a>
                       <a
-                        href="https://github.com/dipinmalla"
+                        href="https://github.com/diwanmalla"
                         target="_blank"
                         rel="noopener noreferrer"
                         className="flex items-center space-x-2 text-purple-300 hover:text-white transition-colors"
@@ -548,7 +593,7 @@ export default function LandingPage() {
                         <span>GitHub</span>
                       </a>
                       <a
-                        href="https://linkedin.com/in/dipinmalla"
+                        href="https://linkedin.com/in/diwanmalla"
                         target="_blank"
                         rel="noopener noreferrer"
                         className="flex items-center space-x-2 text-purple-300 hover:text-white transition-colors"
@@ -583,7 +628,7 @@ export default function LandingPage() {
 
             <div className="border-t border-white/10 pt-4 mt-4">
               <p className="text-purple-400 text-sm">
-                © 2025 SangeetX. Built for educational purposes by Dipin Malla.
+                © 2025 SangeetX. Built for educational purposes by Diwan Malla.
                 All rights reserved.
               </p>
               <p className="text-purple-500 text-xs mt-2">
