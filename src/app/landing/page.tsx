@@ -13,13 +13,13 @@ import {
   Library,
   Headphones,
   Star,
+  Code,
   Users,
   Play,
   Github,
   Linkedin,
   Globe,
   MapPin,
-  Code,
   Briefcase,
 } from "lucide-react";
 import Link from "next/link";
@@ -53,11 +53,25 @@ export default function LandingPage() {
   const [popularSongs, setPopularSongs] = useState<Song[]>([]);
   const [popularArtists, setPopularArtists] = useState<Artist[]>([]);
   const [availableGenres, setAvailableGenres] = useState<ApiGenre[]>([]);
+  const [showCopyrightNotice, setShowCopyrightNotice] = useState(false);
   const [loading, setLoading] = useState({
     songs: true,
     artists: true,
     genres: true,
   });
+
+  // Check if copyright notice was already shown
+  useEffect(() => {
+    const copyrightShown = localStorage.getItem("copyright_notice_shown");
+    if (!copyrightShown) {
+      setShowCopyrightNotice(true);
+    }
+  }, []);
+
+  const handleCopyrightContinue = () => {
+    localStorage.setItem("copyright_notice_shown", "true");
+    setShowCopyrightNotice(false);
+  };
 
   useEffect(() => {
     // Fetch all data in parallel
@@ -100,6 +114,67 @@ export default function LandingPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
+      {/* Copyright Notice Popup */}
+      {showCopyrightNotice && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          {/* Backdrop */}
+          <div className="absolute inset-0 bg-black/70 backdrop-blur-sm"></div>
+          
+          {/* Popup Content */}
+          <div className="relative max-w-md w-full bg-gradient-to-br from-purple-900/90 to-blue-900/90 backdrop-blur-xl rounded-2xl border border-white/20 shadow-2xl">
+            {/* Glow Effect */}
+            <div className="absolute -inset-1 bg-gradient-to-r from-purple-600 via-pink-600 to-blue-600 rounded-2xl blur opacity-30"></div>
+            
+            <div className="relative p-8 text-center">
+              {/* Icon */}
+              <div className="w-16 h-16 bg-gradient-to-br from-purple-500 to-blue-500 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg">
+                <Code className="w-8 h-8 text-white" />
+              </div>
+              
+              {/* Title */}
+              <h2 className="text-2xl font-bold text-white mb-4">
+                Educational Purpose Only
+              </h2>
+              
+              {/* Content */}
+              <div className="space-y-3 text-gray-200 mb-6">
+                <p className="text-sm leading-relaxed">
+                  This project is created for <strong>educational purposes only</strong>. 
+                  SangeetX is a demonstration of modern web development technologies.
+                </p>
+                <p className="text-xs text-gray-300">
+                  All content, features, and functionality are designed to showcase 
+                  programming skills and should not be used for commercial purposes.
+                </p>
+              </div>
+              
+              {/* Copyright Notice */}
+              <div className="bg-white/5 border border-white/10 rounded-lg p-3 mb-6">
+                <p className="text-xs text-gray-300">
+                  © 2024 SangeetX - Educational Demo Project
+                </p>
+                <p className="text-xs text-gray-400 mt-1">
+                  No copyright infringement intended
+                </p>
+              </div>
+              
+              {/* Continue Button */}
+              <Button
+                onClick={handleCopyrightContinue}
+                className="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-semibold py-3 rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg"
+              >
+                I Understand - Continue
+              </Button>
+              
+              {/* Footer */}
+              <p className="text-xs text-gray-400 mt-4">
+                This notice will only appear once
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Guest Navbar */}
       <GuestNavbar currentPage="home" />
 
