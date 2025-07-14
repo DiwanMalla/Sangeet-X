@@ -19,10 +19,7 @@ import {
   Mic,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-
-interface AdminLayoutProps {
-  children: React.ReactNode;
-}
+import AdminAuth from "@/components/admin/admin-auth";
 
 const adminNavItems = [
   {
@@ -63,9 +60,15 @@ const adminNavItems = [
   },
 ];
 
-export default function AdminLayout({ children }: AdminLayoutProps) {
+function AdminLayoutContent({ children }: { children: React.ReactNode }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const pathname = usePathname();
+
+  const handleLogout = () => {
+    localStorage.removeItem("admin_authenticated");
+    localStorage.removeItem("admin_auth_time");
+    window.location.reload(); // Refresh to trigger auth check
+  };
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
@@ -148,15 +151,14 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
             })}
           </nav>
           <div className="p-4 border-t border-gray-200 dark:border-gray-700">
-            <Link href={"/"}>
-              <Button
-                variant="ghost"
-                className="w-full justify-start text-red-600 hover:text-red-700 hover:bg-red-50"
-              >
-                <LogOut className="h-4 w-4 mr-2" />
-                Sign Out
-              </Button>
-            </Link>
+            <Button
+              variant="ghost"
+              className="w-full justify-start text-red-600 hover:text-red-700 hover:bg-red-50"
+              onClick={handleLogout}
+            >
+              <LogOut className="h-4 w-4 mr-2" />
+              Sign Out
+            </Button>
           </div>
         </div>
       </div>
@@ -201,5 +203,17 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
         <main className="flex-1">{children}</main>
       </div>
     </div>
+  );
+}
+
+export default function AdminLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  return (
+    <AdminAuth>
+      <AdminLayoutContent>{children}</AdminLayoutContent>
+    </AdminAuth>
   );
 }
