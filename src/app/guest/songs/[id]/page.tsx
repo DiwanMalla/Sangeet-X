@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { useParams, useRouter } from "next/navigation";
 import GuestNavbar from "@/components/common/guest-navbar";
+import UpNextComponent from "@/components/ui/up-next-component";
 import {
   Play,
   Pause,
@@ -11,7 +12,6 @@ import {
   SkipBack,
   SkipForward,
   LogIn,
-  Clock,
   Eye,
 } from "lucide-react";
 import Image from "next/image";
@@ -64,11 +64,30 @@ export default function GuestSongPage() {
   const [isSynced, setIsSynced] = useState(true);
   const [thought, setThought] = useState("");
   const [audio, setAudio] = useState<HTMLAudioElement | null>(null);
+  const [isTransitioning, setIsTransitioning] = useState(false);
+  const [autoPlay, setAutoPlay] = useState(true);
+  const currentAudioUrl = useRef<string | null>(null);
+
+  // Load autoplay setting from localStorage on component mount
+  useEffect(() => {
+    const savedAutoPlay = localStorage.getItem("songAutoPlay");
+    if (savedAutoPlay !== null) {
+      setAutoPlay(savedAutoPlay === "true");
+    }
+  }, []);
+
+  // Save autoplay setting to localStorage when it changes
+  useEffect(() => {
+    localStorage.setItem("songAutoPlay", autoPlay.toString());
+  }, [autoPlay]);
 
   const fetchSong = useCallback(async () => {
     try {
-      // Fetch song data
-      const response = await fetch(`/api/guest/songs/${params.id}`);
+      // Fetch song data - we only need the main song data here
+      // Components will fetch their own related songs/playlist data
+      const response = await fetch(
+        `/api/guest/songs/${params.id}?autoplay=false`
+      );
       const data = await response.json();
 
       if (data.success) {
@@ -93,11 +112,40 @@ export default function GuestSongPage() {
 
   useEffect(() => {
     fetchSong();
-  }, [params.id, fetchSong]);
+  }, [fetchSong]);
 
+  // Simple navigation functions - components will handle playlist logic
+  const playNextSong = useCallback(() => {
+    // This will be handled by the playlist component
+    console.log("Next song - handled by playlist component");
+  }, []);
+
+  const playPreviousSong = useCallback(() => {
+    // This will be handled by the playlist component
+    console.log("Previous song - handled by playlist component");
+  }, []);
+
+  // For now, disable navigation buttons since components handle their own navigation
+  const canPlayNext = false;
+  const canPlayPrevious = false;
+
+  // Create audio element when song URL changes
   useEffect(() => {
-    if (songData?.song.audioUrl) {
+    if (
+      songData?.song.audioUrl &&
+      currentAudioUrl.current !== songData.song.audioUrl
+    ) {
+      // Clean up previous audio
+      if (audio) {
+        audio.pause();
+        audio.removeEventListener("loadedmetadata", () => {});
+        audio.removeEventListener("timeupdate", () => {});
+        audio.removeEventListener("canplaythrough", () => {});
+      }
+
+      // Create new audio element
       const audioElement = new Audio(songData.song.audioUrl);
+      currentAudioUrl.current = songData.song.audioUrl;
 
       audioElement.addEventListener("loadedmetadata", () => {
         setDuration(audioElement.duration);
@@ -107,31 +155,82 @@ export default function GuestSongPage() {
         setCurrentTime(audioElement.currentTime);
       });
 
-      audioElement.addEventListener("ended", () => {
-        setIsPlaying(false);
-        setCurrentTime(0);
+      // Auto-start playing when song loads (YouTube-like behavior)
+      audioElement.addEventListener("canplaythrough", () => {
+        audioElement
+          .play()
+          .then(() => {
+            setIsPlaying(true);
+          })
+          .catch((error) => {
+            console.log("Auto-play prevented by browser:", error);
+          });
       });
 
       setAudio(audioElement);
 
+      // Cleanup function
       return () => {
         audioElement.pause();
         audioElement.removeEventListener("loadedmetadata", () => {});
         audioElement.removeEventListener("timeupdate", () => {});
-        audioElement.removeEventListener("ended", () => {});
+        audioElement.removeEventListener("canplaythrough", () => {});
       };
     }
-  }, [songData?.song.audioUrl]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [songData?.song.audioUrl]); // Intentionally excluding 'audio' to prevent infinite loop
+
+  // Separate effect for handling song ended event
+  useEffect(() => {
+    if (audio) {
+      const handleEnded = () => {
+        setIsPlaying(false);
+        setCurrentTime(0);
+
+        // Auto-play next song if autoplay is enabled
+        if (autoPlay) {
+          // Check if Up Next component has exposed auto-advance function
+          const autoAdvance = (
+            window as Window & { playlistAutoAdvance?: () => void }
+          ).playlistAutoAdvance;
+          if (autoAdvance) {
+            autoAdvance();
+          }
+        }
+      };
+
+      audio.addEventListener("ended", handleEnded);
+
+      return () => {
+        audio.removeEventListener("ended", handleEnded);
+      };
+    }
+  }, [audio, autoPlay]);
+
+  const handleAutoAdvance = useCallback(
+    (nextSongId: string) => {
+      setIsTransitioning(true);
+      router.push(`/guest/songs/${nextSongId}`);
+    },
+    [router]
+  );
 
   const togglePlay = () => {
     if (!audio) return;
 
     if (isPlaying) {
       audio.pause();
+      setIsPlaying(false);
     } else {
-      audio.play();
+      audio
+        .play()
+        .then(() => {
+          setIsPlaying(true);
+        })
+        .catch((error) => {
+          console.log("Play failed:", error);
+        });
     }
-    setIsPlaying(!isPlaying);
   };
 
   const handleSeek = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -159,24 +258,31 @@ export default function GuestSongPage() {
     router.push(`/guest/artists/${artistId}`);
   };
 
-  if (loading) {
+  const toggleAutoPlay = () => {
+    setAutoPlay((prev) => !prev);
+  };
+
+  if (loading || isTransitioning) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
+      <div className="min-h-screen bg-gray-900 flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-16 h-16 border-4 border-purple-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-white text-lg">
+            {isTransitioning ? "Loading next song..." : "Loading..."}
+          </p>
+        </div>
       </div>
     );
   }
 
   if (!songData) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold text-foreground mb-4">
-            Song not found
-          </h1>
+      <div className="min-h-screen bg-gray-900 flex items-center justify-center">
+        <div className="text-center bg-white/10 backdrop-blur-md border border-white/20 rounded-xl p-8">
+          <h1 className="text-2xl font-bold text-white mb-4">Song not found</h1>
           <button
             onClick={() => router.push("/landing")}
-            className="px-6 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors"
+            className="px-6 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors"
           >
             Go Back
           </button>
@@ -185,17 +291,57 @@ export default function GuestSongPage() {
     );
   }
 
-  const { song, relatedSongs } = songData;
+  const { song } = songData;
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-gray-900">
       <GuestNavbar showBackButton={true} />
+
+      {/* Auto-play notification */}
+      {canPlayNext && (
+        <div className="fixed top-20 right-4 z-40 bg-primary/90 backdrop-blur-sm text-white px-4 py-2 rounded-lg shadow-lg border border-white/20">
+          <div className="flex items-center space-x-2 text-sm">
+            <div
+              className={`w-2 h-2 rounded-full ${
+                autoPlay ? "bg-green-400 animate-pulse" : "bg-gray-400"
+              }`}
+            ></div>
+            <span>
+              {autoPlay
+                ? "Auto-play enabled • Next song ready"
+                : "Auto-play disabled"}
+            </span>
+          </div>
+        </div>
+      )}
+
+      {/* Auto-play Control */}
+      <div className="fixed top-20 left-4 z-40">
+        <button
+          onClick={toggleAutoPlay}
+          className={`flex items-center space-x-2 px-3 py-2 rounded-lg shadow-lg border transition-all duration-200 ${
+            autoPlay
+              ? "bg-green-600/90 border-green-500/50 text-white"
+              : "bg-gray-600/90 border-gray-500/50 text-gray-200"
+          } backdrop-blur-sm hover:scale-105`}
+        >
+          <div
+            className={`w-2 h-2 rounded-full ${
+              autoPlay ? "bg-green-300" : "bg-gray-400"
+            }`}
+          ></div>
+          <span className="text-sm font-medium">
+            {autoPlay ? "Auto-play ON" : "Auto-play OFF"}
+          </span>
+        </button>
+      </div>
+
       <div className="container mx-auto px-4 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Main Song Section */}
           <div className="lg:col-span-2">
             {/* Song Image and Controls */}
-            <div className="bg-card border rounded-xl p-6 mb-6">
+            <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-xl p-6 mb-6 shadow-2xl">
               <div className="relative mb-6">
                 <Image
                   src={
@@ -209,7 +355,7 @@ export default function GuestSongPage() {
                 />
 
                 {/* Audio Controls - Overlay on Image */}
-                <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 bg-black/60 backdrop-blur-md rounded-lg p-3 w-4/5 max-w-md">
+                <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 bg-black/70 backdrop-blur-md rounded-lg p-3 w-4/5 max-w-md border border-white/20">
                   {/* Progress Bar */}
                   <div className="mb-2">
                     <input
@@ -228,7 +374,15 @@ export default function GuestSongPage() {
 
                   {/* Control Buttons */}
                   <div className="flex items-center justify-center space-x-3">
-                    <button className="p-1.5 text-white/80 hover:text-white transition-colors">
+                    <button
+                      onClick={playPreviousSong}
+                      disabled={!canPlayPrevious}
+                      className={`p-1.5 transition-colors ${
+                        canPlayPrevious
+                          ? "text-white/80 hover:text-white"
+                          : "text-white/30 cursor-not-allowed"
+                      }`}
+                    >
                       <SkipBack size={18} />
                     </button>
                     <button
@@ -237,7 +391,15 @@ export default function GuestSongPage() {
                     >
                       {isPlaying ? <Pause size={20} /> : <Play size={20} />}
                     </button>
-                    <button className="p-1.5 text-white/80 hover:text-white transition-colors">
+                    <button
+                      onClick={playNextSong}
+                      disabled={!canPlayNext}
+                      className={`p-1.5 transition-colors ${
+                        canPlayNext
+                          ? "text-white/80 hover:text-white"
+                          : "text-white/30 cursor-not-allowed"
+                      }`}
+                    >
                       <SkipForward size={18} />
                     </button>
                   </div>
@@ -247,7 +409,7 @@ export default function GuestSongPage() {
               {/* Artist Info */}
               <div className="grid grid-cols-1 gap-6">
                 <div>
-                  <h3 className="text-lg font-semibold text-foreground mb-2">
+                  <h3 className="text-lg font-semibold text-white mb-2">
                     Artist
                   </h3>
                   <div
@@ -263,13 +425,13 @@ export default function GuestSongPage() {
                       alt={song.artist.name}
                       width={60}
                       height={60}
-                      className="rounded-full"
+                      className="rounded-full border-2 border-white/20"
                     />
                     <div>
-                      <p className="text-foreground font-medium group-hover:text-primary transition-colors">
+                      <p className="text-white font-medium group-hover:text-purple-300 transition-colors">
                         {song.artist.name}
                       </p>
-                      <p className="text-muted-foreground text-sm">Artist</p>
+                      <p className="text-purple-200/70 text-sm">Artist</p>
                     </div>
                   </div>
                 </div>
@@ -277,45 +439,45 @@ export default function GuestSongPage() {
             </div>
 
             {/* Song Details */}
-            <div className="bg-card backdrop-blur-sm rounded-xl p-6">
-              <h1 className="text-3xl font-bold text-foreground mb-2">
+            <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-xl p-6 shadow-2xl">
+              <h1 className="text-3xl font-bold text-white mb-2">
                 {song.title}
               </h1>
-              <p className="text-xl text-primary mb-4">{song.artist.name}</p>
+              <p className="text-xl text-purple-300 mb-4">{song.artist.name}</p>
 
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
                 {song.album && (
                   <div>
-                    <p className="text-muted-foreground">Album</p>
-                    <p className="text-foreground">{song.album}</p>
+                    <p className="text-purple-200/70">Album</p>
+                    <p className="text-white">{song.album}</p>
                   </div>
                 )}
                 <div>
-                  <p className="text-muted-foreground">Genre</p>
-                  <p className="text-foreground">{song.genre}</p>
+                  <p className="text-purple-200/70">Genre</p>
+                  <p className="text-white">{song.genre}</p>
                 </div>
                 {song.year && (
                   <div>
-                    <p className="text-muted-foreground">Year</p>
-                    <p className="text-foreground">{song.year}</p>
+                    <p className="text-purple-200/70">Year</p>
+                    <p className="text-white">{song.year}</p>
                   </div>
                 )}
                 <div>
-                  <p className="text-muted-foreground">Duration</p>
-                  <p className="text-foreground">{formatTime(song.duration)}</p>
+                  <p className="text-purple-200/70">Duration</p>
+                  <p className="text-white">{formatTime(song.duration)}</p>
                 </div>
               </div>
 
-              <div className="flex items-center space-x-4 mt-6 pt-6 border-t border-border">
-                <div className="flex items-center space-x-2 text-muted-foreground">
+              <div className="flex items-center space-x-4 mt-6 pt-6 border-t border-white/20">
+                <div className="flex items-center space-x-2 text-purple-200/70">
                   <Eye size={16} />
                   <span>{song.playCount.toLocaleString()} plays</span>
                 </div>
-                <button className="flex items-center space-x-2 text-muted-foreground hover:text-foreground transition-colors">
+                <button className="flex items-center space-x-2 text-purple-200/70 hover:text-white transition-colors">
                   <Heart size={16} />
                   <span>Like</span>
                 </button>
-                <button className="flex items-center space-x-2 text-muted-foreground hover:text-foreground transition-colors">
+                <button className="flex items-center space-x-2 text-purple-200/70 hover:text-white transition-colors">
                   <Share2 size={16} />
                   <span>Share</span>
                 </button>
@@ -323,8 +485,8 @@ export default function GuestSongPage() {
             </div>
 
             {/* Share Your Thoughts */}
-            <div className="bg-card backdrop-blur-sm rounded-xl p-6">
-              <h3 className="text-lg font-semibold text-foreground mb-4">
+            <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-xl p-6 shadow-2xl">
+              <h3 className="text-lg font-semibold text-white mb-4">
                 Share Your Thoughts
               </h3>
               <div className="space-y-3">
@@ -332,12 +494,12 @@ export default function GuestSongPage() {
                   value={thought}
                   onChange={(e) => setThought(e.target.value)}
                   placeholder="What do you think about this song?"
-                  className="w-full p-3 bg-muted/50 border border-border rounded-lg text-foreground placeholder-muted-foreground focus:outline-none focus:border-primary resize-none"
+                  className="w-full p-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-purple-200/50 focus:outline-none focus:border-purple-400 resize-none backdrop-blur-sm"
                   rows={4}
                 />
                 <button
                   onClick={handleLoginRedirect}
-                  className="flex items-center space-x-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors"
+                  className="flex items-center space-x-2 px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors"
                 >
                   <LogIn size={16} />
                   <span>Login to Share</span>
@@ -349,17 +511,15 @@ export default function GuestSongPage() {
           {/* Related Songs Sidebar */}
           <div className="lg:col-span-1">
             {/* Subtitles Section */}
-            <div className="bg-card backdrop-blur-sm rounded-xl p-6 mb-6">
+            <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-xl p-6 mb-6 shadow-2xl">
               <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-semibold text-foreground">
-                  Subtitles
-                </h3>
+                <h3 className="text-lg font-semibold text-white">Subtitles</h3>
                 <button
                   onClick={() => setIsSynced(!isSynced)}
                   className={`px-3 py-1 rounded-lg transition-colors text-sm flex items-center gap-2 ${
                     isSynced
-                      ? "bg-primary text-primary-foreground"
-                      : "bg-muted text-muted-foreground hover:bg-muted/80"
+                      ? "bg-purple-600 text-white"
+                      : "bg-white/20 text-purple-200 hover:bg-white/30"
                   }`}
                 >
                   <div
@@ -373,13 +533,13 @@ export default function GuestSongPage() {
 
               <div className="space-y-4">
                 {/* Language Selection Tabs */}
-                <div className="flex gap-1 p-1 bg-muted rounded-lg">
+                <div className="flex gap-1 p-1 bg-white/10 rounded-lg">
                   <button
                     onClick={() => setSubtitleLanguage("english")}
                     className={`flex-1 px-3 py-2 rounded-md transition-all duration-200 text-sm font-medium ${
                       subtitleLanguage === "english"
-                        ? "bg-primary text-primary-foreground shadow-md transform scale-105 ring-2 ring-primary/20"
-                        : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
+                        ? "bg-purple-600 text-white shadow-md transform scale-105 ring-2 ring-purple-500/20"
+                        : "text-purple-200 hover:text-white hover:bg-white/10"
                     }`}
                   >
                     English
@@ -388,8 +548,8 @@ export default function GuestSongPage() {
                     onClick={() => setSubtitleLanguage("nepali")}
                     className={`flex-1 px-3 py-2 rounded-md transition-all duration-200 text-sm font-medium ${
                       subtitleLanguage === "nepali"
-                        ? "bg-primary text-primary-foreground shadow-md transform scale-105 ring-2 ring-primary/20"
-                        : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
+                        ? "bg-purple-600 text-white shadow-md transform scale-105 ring-2 ring-purple-500/20"
+                        : "text-purple-200 hover:text-white hover:bg-white/10"
                     }`}
                   >
                     नेपाली
@@ -397,7 +557,7 @@ export default function GuestSongPage() {
                 </div>
 
                 {/* Subtitle Display */}
-                <div className="bg-muted/50 rounded-lg p-4 min-h-[120px]">
+                <div className="bg-white/5 border border-white/10 rounded-lg p-4 min-h-[120px]">
                   <KaraokeSubtitleDisplay
                     subtitles={subtitles
                       .filter((sub) => sub.language === subtitleLanguage)
@@ -421,52 +581,14 @@ export default function GuestSongPage() {
               </div>
             </div>
 
-            {/* Related Songs */}
-            <div className="bg-card backdrop-blur-sm rounded-xl p-6">
-              <h2 className="text-xl font-bold text-foreground mb-6">
-                Related Songs
-              </h2>
-              <div className="space-y-4">
-                {relatedSongs.map((relatedSong) => (
-                  <div
-                    key={relatedSong.id}
-                    className="flex items-center space-x-3 p-3 rounded-lg hover:bg-muted/50 cursor-pointer transition-colors group"
-                    onClick={() => handleSongClick(relatedSong.id)}
-                  >
-                    <Image
-                      src={
-                        relatedSong.coverUrl ||
-                        "https://via.placeholder.com/50x50/6b46c1/ffffff?text=♪"
-                      }
-                      alt={relatedSong.title}
-                      width={50}
-                      height={50}
-                      className="rounded-lg"
-                    />
-                    <div className="flex-1 min-w-0">
-                      <p className="text-foreground font-medium truncate group-hover:text-primary transition-colors">
-                        {relatedSong.title}
-                      </p>
-                      <p className="text-muted-foreground text-sm truncate">
-                        {relatedSong.artist.name}
-                      </p>
-                      <div className="flex items-center space-x-2 text-xs text-muted-foreground mt-1">
-                        <Eye size={12} />
-                        <span>{relatedSong.playCount.toLocaleString()}</span>
-                        <Clock size={12} />
-                        <span>{formatTime(relatedSong.duration)}</span>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-
-                {relatedSongs.length === 0 && (
-                  <p className="text-muted-foreground text-center py-8">
-                    No related songs found
-                  </p>
-                )}
-              </div>
-            </div>
+            {/* Up Next Component - Shows all available songs with autoplay */}
+            <UpNextComponent
+              currentSongId={params.id as string}
+              onSongClick={handleSongClick}
+              formatTime={formatTime}
+              autoPlay={autoPlay}
+              onAutoAdvance={handleAutoAdvance}
+            />
           </div>
         </div>
       </div>

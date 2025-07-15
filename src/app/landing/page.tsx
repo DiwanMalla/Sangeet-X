@@ -119,45 +119,47 @@ export default function LandingPage() {
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           {/* Backdrop */}
           <div className="absolute inset-0 bg-black/70 backdrop-blur-sm"></div>
-          
+
           {/* Popup Content */}
           <div className="relative max-w-md w-full bg-gradient-to-br from-purple-900/90 to-blue-900/90 backdrop-blur-xl rounded-2xl border border-white/20 shadow-2xl">
             {/* Glow Effect */}
             <div className="absolute -inset-1 bg-gradient-to-r from-purple-600 via-pink-600 to-blue-600 rounded-2xl blur opacity-30"></div>
-            
+
             <div className="relative p-8 text-center">
               {/* Icon */}
               <div className="w-16 h-16 bg-gradient-to-br from-purple-500 to-blue-500 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg">
                 <Code className="w-8 h-8 text-white" />
               </div>
-              
+
               {/* Title */}
               <h2 className="text-2xl font-bold text-white mb-4">
                 Educational Purpose Only
               </h2>
-              
+
               {/* Content */}
               <div className="space-y-3 text-gray-200 mb-6">
                 <p className="text-sm leading-relaxed">
-                  This project is created for <strong>educational purposes only</strong>. 
-                  SangeetX is a demonstration of modern web development technologies.
+                  This project is created for{" "}
+                  <strong>educational purposes only</strong>. SangeetX is a
+                  demonstration of modern web development technologies.
                 </p>
                 <p className="text-xs text-gray-300">
-                  All content, features, and functionality are designed to showcase 
-                  programming skills and should not be used for commercial purposes.
+                  All content, features, and functionality are designed to
+                  showcase programming skills and should not be used for
+                  commercial purposes.
                 </p>
               </div>
-              
+
               {/* Copyright Notice */}
               <div className="bg-white/5 border border-white/10 rounded-lg p-3 mb-6">
                 <p className="text-xs text-gray-300">
-                  © 2024 SangeetX - Educational Demo Project
+                  © 2025 SangeetX - Educational Demo Project
                 </p>
                 <p className="text-xs text-gray-400 mt-1">
                   No copyright infringement intended
                 </p>
               </div>
-              
+
               {/* Continue Button */}
               <Button
                 onClick={handleCopyrightContinue}
@@ -165,7 +167,7 @@ export default function LandingPage() {
               >
                 I Understand - Continue
               </Button>
-              
+
               {/* Footer */}
               <p className="text-xs text-gray-400 mt-4">
                 This notice will only appear once
@@ -222,39 +224,48 @@ export default function LandingPage() {
 
           {/* Features Preview */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-16">
-            <div className="text-center">
-              <div className="w-16 h-16 bg-gradient-to-r from-red-500 to-pink-500 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
-                <Heart className="w-8 h-8 text-white" />
+            <div className="group text-center">
+              <div className="relative mb-6">
+                <div className="w-20 h-20 bg-gradient-to-br from-red-500 to-pink-500 rounded-3xl flex items-center justify-center mx-auto shadow-2xl transform group-hover:scale-110 group-hover:rotate-3 transition-all duration-500">
+                  <div className="absolute -inset-1 bg-gradient-to-br from-red-600 to-pink-600 rounded-3xl blur opacity-30 group-hover:opacity-50 transition duration-500"></div>
+                  <Heart className="w-10 h-10 text-white relative z-10" />
+                </div>
               </div>
-              <h3 className="text-xl font-semibold text-white mb-2">
+              <h3 className="text-2xl font-bold text-white mb-3">
                 Like Your Favorites
               </h3>
-              <p className="text-purple-300">
-                Save and organize your favorite tracks
+              <p className="text-purple-300 text-lg leading-relaxed">
+                Save and organize your favorite tracks with smart collections
               </p>
             </div>
 
-            <div className="text-center">
-              <div className="w-16 h-16 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
-                <Library className="w-8 h-8 text-white" />
+            <div className="group text-center">
+              <div className="relative mb-6">
+                <div className="w-20 h-20 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-3xl flex items-center justify-center mx-auto shadow-2xl transform group-hover:scale-110 group-hover:rotate-3 transition-all duration-500">
+                  <div className="absolute -inset-1 bg-gradient-to-br from-blue-600 to-cyan-600 rounded-3xl blur opacity-30 group-hover:opacity-50 transition duration-500"></div>
+                  <Library className="w-10 h-10 text-white relative z-10" />
+                </div>
               </div>
-              <h3 className="text-xl font-semibold text-white mb-2">
+              <h3 className="text-2xl font-bold text-white mb-3">
                 Personal Library
               </h3>
-              <p className="text-purple-300">
-                Create playlists and manage your collection
+              <p className="text-purple-300 text-lg leading-relaxed">
+                Create playlists and manage your music collection
               </p>
             </div>
 
-            <div className="text-center">
-              <div className="w-16 h-16 bg-gradient-to-r from-green-500 to-emerald-500 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
-                <Search className="w-8 h-8 text-white" />
+            <div className="group text-center">
+              <div className="relative mb-6">
+                <div className="w-20 h-20 bg-gradient-to-br from-green-500 to-emerald-500 rounded-3xl flex items-center justify-center mx-auto shadow-2xl transform group-hover:scale-110 group-hover:rotate-3 transition-all duration-500">
+                  <div className="absolute -inset-1 bg-gradient-to-br from-green-600 to-emerald-600 rounded-3xl blur opacity-30 group-hover:opacity-50 transition duration-500"></div>
+                  <Search className="w-10 h-10 text-white relative z-10" />
+                </div>
               </div>
-              <h3 className="text-xl font-semibold text-white mb-2">
+              <h3 className="text-2xl font-bold text-white mb-3">
                 Discover Music
               </h3>
-              <p className="text-purple-300">
-                Find new artists and trending songs
+              <p className="text-purple-300 text-lg leading-relaxed">
+                Find new artists and trending songs effortlessly
               </p>
             </div>
           </div>
@@ -262,31 +273,39 @@ export default function LandingPage() {
       </section>
 
       {/* Genres Section */}
-      <section id="features" className="py-16 bg-black/20">
+      <section
+        id="features"
+        className="py-24 bg-gradient-to-b from-black/30 to-black/50 backdrop-blur-sm"
+      >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <h2 className="text-4xl font-bold text-white mb-4">
+          <div className="text-center mb-16">
+            <div className="inline-block bg-gradient-to-r from-purple-500/20 to-violet-500/20 backdrop-blur-sm border border-white/20 rounded-full px-6 py-2 mb-6">
+              <span className="text-purple-200 font-medium">
+                🎼 Music Categories
+              </span>
+            </div>
+            <h2 className="text-5xl md:text-6xl font-bold mb-6 bg-gradient-to-r from-white to-purple-200 bg-clip-text text-transparent">
               Explore Genres
             </h2>
-            <p className="text-xl text-purple-300">
-              Discover music across different genres
+            <p className="text-2xl text-purple-300 max-w-3xl mx-auto">
+              Discover music across different genres and moods
             </p>
           </div>
 
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
             {loading.genres ? (
-              // Loading skeletons for genres
+              // Enhanced Loading skeletons for genres
               Array.from({ length: 6 }).map((_, index) => (
                 <Card
                   key={index}
-                  className="bg-white/5 border-white/10 animate-pulse"
+                  className="bg-white/5 border-white/10 animate-pulse backdrop-blur-sm hover:bg-white/10 transition-all duration-500"
                 >
-                  <CardContent className="p-4 text-center">
-                    <div className="w-16 h-16 mx-auto mb-4 bg-gradient-to-r from-purple-500/50 to-violet-500/50 rounded-2xl flex items-center justify-center">
-                      <Music className="w-8 h-8 text-white/50" />
+                  <CardContent className="p-6 text-center">
+                    <div className="w-20 h-20 mx-auto mb-6 bg-gradient-to-br from-purple-500/50 to-violet-500/50 rounded-3xl flex items-center justify-center">
+                      <Music className="w-10 h-10 text-white/50" />
                     </div>
-                    <div className="h-5 bg-white/10 rounded mb-2"></div>
-                    <div className="h-4 bg-white/5 rounded w-16 mx-auto"></div>
+                    <div className="h-6 bg-white/10 rounded-lg mb-3"></div>
+                    <div className="h-4 bg-white/5 rounded-lg w-20 mx-auto"></div>
                   </CardContent>
                 </Card>
               ))
@@ -294,18 +313,21 @@ export default function LandingPage() {
               availableGenres.map((genre) => (
                 <Card
                   key={genre.name}
-                  className="group cursor-pointer bg-white/5 border-white/10 hover:bg-white/10 transition-all duration-300 hover:scale-105"
+                  className="group cursor-pointer bg-white/5 border-white/10 hover:bg-white/10 transition-all duration-500 hover:scale-105 hover:-translate-y-2 backdrop-blur-sm"
                   onClick={() =>
                     router.push(
                       `/guest/genres?genre=${encodeURIComponent(genre.name)}`
                     )
                   }
                 >
-                  <CardContent className="p-4 text-center">
-                    <div className="w-16 h-16 mx-auto mb-4 bg-gradient-to-r from-purple-500 to-violet-500 rounded-2xl flex items-center justify-center shadow-lg group-hover:shadow-2xl transition-all duration-300">
-                      <Music className="w-8 h-8 text-white" />
+                  <CardContent className="p-6 text-center">
+                    <div className="relative mb-6">
+                      <div className="w-20 h-20 mx-auto bg-gradient-to-br from-purple-500 to-violet-500 rounded-3xl flex items-center justify-center shadow-2xl group-hover:shadow-purple-500/30 transition-all duration-500 transform group-hover:scale-110">
+                        <div className="absolute -inset-1 bg-gradient-to-br from-purple-600 to-violet-600 rounded-3xl blur opacity-30 group-hover:opacity-50 transition duration-500"></div>
+                        <Music className="w-10 h-10 text-white relative z-10" />
+                      </div>
                     </div>
-                    <h3 className="text-white font-semibold mb-1">
+                    <h3 className="text-white font-bold text-lg mb-2 group-hover:text-purple-200 transition-colors">
                       {genre.name}
                     </h3>
                     <p className="text-purple-300 text-sm">
@@ -315,12 +337,14 @@ export default function LandingPage() {
                 </Card>
               ))
             ) : (
-              <div className="col-span-full text-center py-12">
-                <Music className="mx-auto text-slate-600 mb-4" size={48} />
-                <p className="text-slate-400 text-lg">
+              <div className="col-span-full text-center py-16">
+                <div className="w-24 h-24 bg-gradient-to-br from-slate-600 to-slate-700 rounded-3xl flex items-center justify-center mx-auto mb-6">
+                  <Music className="text-slate-400" size={48} />
+                </div>
+                <p className="text-slate-400 text-2xl font-semibold mb-2">
                   No genres available yet
                 </p>
-                <p className="text-slate-500 text-sm">
+                <p className="text-slate-500 text-lg">
                   Add some songs to see genres here
                 </p>
               </div>
@@ -330,14 +354,30 @@ export default function LandingPage() {
       </section>
 
       {/* Discover Section */}
-      <section id="discover" className="py-16">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+      <section id="discover" className="py-24 relative">
+        {/* Section Background */}
+        <div className="absolute inset-0 bg-gradient-to-r from-purple-900/20 to-pink-900/20 backdrop-blur-sm"></div>
+
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+          <div className="text-center mb-16">
+            <div className="inline-block bg-gradient-to-r from-yellow-500/20 to-orange-500/20 backdrop-blur-sm border border-white/20 rounded-full px-6 py-2 mb-6">
+              <span className="text-yellow-200 font-medium">
+                🔥 Trending Now
+              </span>
+            </div>
+            <h2 className="text-5xl md:text-6xl font-bold mb-6 bg-gradient-to-r from-white to-yellow-200 bg-clip-text text-transparent">
+              Discover Music
+            </h2>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-16">
             {/* Popular Songs */}
-            <div>
+            <div className="backdrop-blur-sm bg-white/5 rounded-3xl p-8 border border-white/10">
               <div className="flex items-center mb-8">
-                <Star className="w-8 h-8 text-yellow-400 mr-3" />
-                <h2 className="text-3xl font-bold text-white">Popular Songs</h2>
+                <div className="w-12 h-12 bg-gradient-to-r from-yellow-500 to-orange-500 rounded-2xl flex items-center justify-center mr-4">
+                  <Star className="w-6 h-6 text-white" />
+                </div>
+                <h3 className="text-3xl font-bold text-white">Popular Songs</h3>
               </div>
 
               <div className="space-y-4">
@@ -454,12 +494,14 @@ export default function LandingPage() {
             </div>
 
             {/* Discover Artists */}
-            <div>
+            <div className="backdrop-blur-sm bg-white/5 rounded-3xl p-8 border border-white/10">
               <div className="flex items-center mb-8">
-                <Users className="w-8 h-8 text-cyan-400 mr-3" />
-                <h2 className="text-3xl font-bold text-white">
+                <div className="w-12 h-12 bg-gradient-to-r from-cyan-500 to-blue-500 rounded-2xl flex items-center justify-center mr-4">
+                  <Users className="w-6 h-6 text-white" />
+                </div>
+                <h3 className="text-3xl font-bold text-white">
                   Discover Artists
-                </h2>
+                </h3>
               </div>
 
               <div className="space-y-4">
