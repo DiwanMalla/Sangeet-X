@@ -181,90 +181,93 @@ export default function LandingPage() {
       <GuestNavbar currentPage="home" />
 
       {/* Hero Section */}
-      <section id="home" className="relative py-20 lg:py-32 overflow-hidden">
+      <section
+        id="home"
+        className="relative py-12 sm:py-16 lg:py-20 xl:py-32 overflow-hidden"
+      >
         {/* Background Effects */}
-        <div className="absolute inset-0 opacity-30">
-          <div className="absolute top-0 left-1/4 w-96 h-96 bg-purple-500 rounded-full mix-blend-multiply filter blur-xl animate-pulse"></div>
-          <div className="absolute top-0 right-1/4 w-96 h-96 bg-pink-500 rounded-full mix-blend-multiply filter blur-xl animate-pulse delay-1000"></div>
-          <div className="absolute bottom-0 left-1/2 w-96 h-96 bg-cyan-500 rounded-full mix-blend-multiply filter blur-xl animate-pulse delay-2000"></div>
+        <div className="absolute inset-0 opacity-20 sm:opacity-30">
+          <div className="absolute top-0 left-1/4 w-48 h-48 sm:w-72 sm:h-72 lg:w-96 lg:h-96 bg-purple-500 rounded-full mix-blend-multiply filter blur-xl animate-pulse"></div>
+          <div className="absolute top-0 right-1/4 w-48 h-48 sm:w-72 sm:h-72 lg:w-96 lg:h-96 bg-pink-500 rounded-full mix-blend-multiply filter blur-xl animate-pulse delay-1000"></div>
+          <div className="absolute bottom-0 left-1/2 w-48 h-48 sm:w-72 sm:h-72 lg:w-96 lg:h-96 bg-cyan-500 rounded-full mix-blend-multiply filter blur-xl animate-pulse delay-2000"></div>
         </div>
 
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full mb-8 shadow-2xl">
-            <Headphones className="w-10 h-10 text-white animate-bounce" />
+          <div className="inline-flex items-center justify-center w-16 h-16 sm:w-20 sm:h-20 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full mb-6 sm:mb-8 shadow-2xl">
+            <Headphones className="w-8 h-8 sm:w-10 sm:h-10 text-white animate-bounce" />
           </div>
 
-          <h1 className="text-5xl md:text-7xl font-bold mb-6 bg-gradient-to-r from-white via-purple-200 to-cyan-200 bg-clip-text text-transparent">
+          <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold mb-4 sm:mb-6 bg-gradient-to-r from-white via-purple-200 to-cyan-200 bg-clip-text text-transparent leading-tight">
             Welcome to SangeetX
           </h1>
 
-          <p className="text-xl md:text-2xl text-purple-200 mb-8 max-w-3xl mx-auto">
+          <p className="text-lg sm:text-xl md:text-2xl text-purple-200 mb-6 sm:mb-8 max-w-3xl mx-auto px-4">
             Discover, stream, and enjoy your favorite Nepali music. Experience
             the best of traditional and modern Nepali songs in one place.
           </p>
 
-          <div className="flex flex-col sm:flex-row items-center justify-center space-y-4 sm:space-y-0 sm:space-x-6">
-            <Link href="/sign-up">
-              <Button className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white text-lg px-8 py-4 rounded-xl shadow-lg hover:shadow-purple-500/25 transition-all duration-300">
-                <Play className="w-5 h-5 mr-2" />
+          <div className="flex flex-col sm:flex-row items-center justify-center space-y-4 sm:space-y-0 sm:space-x-4 lg:space-x-6 px-4">
+            <Link href="/sign-up" className="w-full sm:w-auto">
+              <Button className="w-full sm:w-auto bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white text-base sm:text-lg px-6 sm:px-8 py-3 sm:py-4 rounded-xl shadow-lg hover:shadow-purple-500/25 transition-all duration-300">
+                <Play className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
                 Get Started Free
               </Button>
             </Link>
 
-            <Link href="/login">
+            <Link href="/login" className="w-full sm:w-auto">
               <Button
                 variant="outline"
-                className="border-white/20 text-white hover:bg-white/10 text-lg px-8 py-4 rounded-xl"
+                className="w-full sm:w-auto border-white/20 text-white hover:bg-white/10 text-base sm:text-lg px-6 sm:px-8 py-3 sm:py-4 rounded-xl"
               >
-                <Users className="w-5 h-5 mr-2" />
+                <Users className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
                 Sign In
               </Button>
             </Link>
           </div>
 
           {/* Features Preview */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-16">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 mt-12 sm:mt-16 px-4">
             <div className="group text-center">
-              <div className="relative mb-6">
-                <div className="w-20 h-20 bg-gradient-to-br from-red-500 to-pink-500 rounded-3xl flex items-center justify-center mx-auto shadow-2xl transform group-hover:scale-110 group-hover:rotate-3 transition-all duration-500">
-                  <div className="absolute -inset-1 bg-gradient-to-br from-red-600 to-pink-600 rounded-3xl blur opacity-30 group-hover:opacity-50 transition duration-500"></div>
-                  <Heart className="w-10 h-10 text-white relative z-10" />
+              <div className="relative mb-4 sm:mb-6">
+                <div className="w-16 h-16 sm:w-20 sm:h-20 bg-gradient-to-br from-red-500 to-pink-500 rounded-2xl sm:rounded-3xl flex items-center justify-center mx-auto shadow-2xl transform group-hover:scale-110 group-hover:rotate-3 transition-all duration-500">
+                  <div className="absolute -inset-1 bg-gradient-to-br from-red-600 to-pink-600 rounded-2xl sm:rounded-3xl blur opacity-30 group-hover:opacity-50 transition duration-500"></div>
+                  <Heart className="w-8 h-8 sm:w-10 sm:h-10 text-white relative z-10" />
                 </div>
               </div>
-              <h3 className="text-2xl font-bold text-white mb-3">
+              <h3 className="text-xl sm:text-2xl font-bold text-white mb-2 sm:mb-3">
                 Like Your Favorites
               </h3>
-              <p className="text-purple-300 text-lg leading-relaxed">
+              <p className="text-purple-300 text-base sm:text-lg leading-relaxed">
                 Save and organize your favorite tracks with smart collections
               </p>
             </div>
 
             <div className="group text-center">
-              <div className="relative mb-6">
-                <div className="w-20 h-20 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-3xl flex items-center justify-center mx-auto shadow-2xl transform group-hover:scale-110 group-hover:rotate-3 transition-all duration-500">
-                  <div className="absolute -inset-1 bg-gradient-to-br from-blue-600 to-cyan-600 rounded-3xl blur opacity-30 group-hover:opacity-50 transition duration-500"></div>
-                  <Library className="w-10 h-10 text-white relative z-10" />
+              <div className="relative mb-4 sm:mb-6">
+                <div className="w-16 h-16 sm:w-20 sm:h-20 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-2xl sm:rounded-3xl flex items-center justify-center mx-auto shadow-2xl transform group-hover:scale-110 group-hover:rotate-3 transition-all duration-500">
+                  <div className="absolute -inset-1 bg-gradient-to-br from-blue-600 to-cyan-600 rounded-2xl sm:rounded-3xl blur opacity-30 group-hover:opacity-50 transition duration-500"></div>
+                  <Library className="w-8 h-8 sm:w-10 sm:h-10 text-white relative z-10" />
                 </div>
               </div>
-              <h3 className="text-2xl font-bold text-white mb-3">
+              <h3 className="text-xl sm:text-2xl font-bold text-white mb-2 sm:mb-3">
                 Personal Library
               </h3>
-              <p className="text-purple-300 text-lg leading-relaxed">
+              <p className="text-purple-300 text-base sm:text-lg leading-relaxed">
                 Create playlists and manage your music collection
               </p>
             </div>
 
-            <div className="group text-center">
-              <div className="relative mb-6">
-                <div className="w-20 h-20 bg-gradient-to-br from-green-500 to-emerald-500 rounded-3xl flex items-center justify-center mx-auto shadow-2xl transform group-hover:scale-110 group-hover:rotate-3 transition-all duration-500">
-                  <div className="absolute -inset-1 bg-gradient-to-br from-green-600 to-emerald-600 rounded-3xl blur opacity-30 group-hover:opacity-50 transition duration-500"></div>
-                  <Search className="w-10 h-10 text-white relative z-10" />
+            <div className="group text-center sm:col-span-2 lg:col-span-1">
+              <div className="relative mb-4 sm:mb-6">
+                <div className="w-16 h-16 sm:w-20 sm:h-20 bg-gradient-to-br from-green-500 to-emerald-500 rounded-2xl sm:rounded-3xl flex items-center justify-center mx-auto shadow-2xl transform group-hover:scale-110 group-hover:rotate-3 transition-all duration-500">
+                  <div className="absolute -inset-1 bg-gradient-to-br from-green-600 to-emerald-600 rounded-2xl sm:rounded-3xl blur opacity-30 group-hover:opacity-50 transition duration-500"></div>
+                  <Search className="w-8 h-8 sm:w-10 sm:h-10 text-white relative z-10" />
                 </div>
               </div>
-              <h3 className="text-2xl font-bold text-white mb-3">
+              <h3 className="text-xl sm:text-2xl font-bold text-white mb-2 sm:mb-3">
                 Discover Music
               </h3>
-              <p className="text-purple-300 text-lg leading-relaxed">
+              <p className="text-purple-300 text-base sm:text-lg leading-relaxed">
                 Find new artists and trending songs effortlessly
               </p>
             </div>
@@ -403,12 +406,12 @@ export default function LandingPage() {
                             <div className="h-5 bg-white/10 rounded mb-2 w-32"></div>
                             <div className="h-4 bg-white/5 rounded w-24"></div>
                           </div>
-                          {/* Duration skeleton */}
-                          <div className="w-10 h-4 bg-white/5 rounded"></div>
-                          {/* Play count skeleton */}
-                          <div className="w-8 h-4 bg-white/5 rounded hidden sm:block"></div>
-                          {/* Play button skeleton */}
-                          <div className="w-6 h-6 bg-white/5 rounded-full"></div>
+                          {/* Duration skeleton - hidden on small screens */}
+                          <div className="w-10 h-4 bg-white/5 rounded hidden md:block"></div>
+                          {/* Play count skeleton - hidden on smaller screens */}
+                          <div className="w-8 h-4 bg-white/5 rounded hidden lg:block"></div>
+                          {/* Play button skeleton - hidden on small screens */}
+                          <div className="w-6 h-6 bg-white/5 rounded-full hidden sm:block"></div>
                         </div>
                       </CardContent>
                     </Card>
@@ -440,7 +443,7 @@ export default function LandingPage() {
                               className="w-12 h-12 object-cover rounded-lg"
                             />
                             <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity rounded-lg flex items-center justify-center">
-                              <Play className="w-4 h-4 text-white" />
+                              <Play className="w-4 h-4 text-white hidden sm:block" />
                             </div>
                           </div>
 
@@ -460,21 +463,21 @@ export default function LandingPage() {
                             </p>
                           </div>
 
-                          {/* Duration */}
-                          <div className="text-purple-400 text-sm font-mono">
+                          {/* Duration - hidden on small screens */}
+                          <div className="text-purple-400 text-sm font-mono hidden md:block">
                             {Math.floor(song.duration / 60)}:
                             {(song.duration % 60).toString().padStart(2, "0")}
                           </div>
 
-                          {/* Play Count */}
-                          <div className="text-purple-400 text-sm hidden sm:block">
+                          {/* Play Count - hidden on smaller screens */}
+                          <div className="text-purple-400 text-sm hidden lg:block">
                             {song.playCount >= 1000
                               ? `${Math.floor(song.playCount / 1000)}K`
                               : song.playCount}
                           </div>
 
-                          {/* Play Button */}
-                          <PlayCircle className="w-6 h-6 text-purple-400 hover:text-white transition-colors opacity-70 group-hover:opacity-100" />
+                          {/* Play Button - hidden on small screens */}
+                          <PlayCircle className="w-6 h-6 text-purple-400 hover:text-white transition-colors opacity-70 group-hover:opacity-100 hidden sm:block" />
                         </div>
                       </CardContent>
                     </Card>
