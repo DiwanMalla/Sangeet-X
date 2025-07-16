@@ -186,14 +186,17 @@ export default function GuestArtistPage() {
         </div>
 
         {/* Songs List */}
-        <div className="bg-card backdrop-blur-sm rounded-xl p-6">
-          <h2 className="text-2xl font-bold text-foreground mb-6">
+        <div className="bg-card backdrop-blur-sm rounded-xl p-6 shadow-lg border border-border/50">
+          <h2 className="text-2xl font-bold text-foreground mb-6 flex items-center">
+            <Music className="mr-3 text-primary" size={28} />
             Songs by {artist.name}
           </h2>
 
           {artist.songs.length === 0 ? (
             <div className="text-center py-12">
-              <Music className="mx-auto text-muted-foreground mb-4" size={48} />
+              <div className="w-24 h-24 mx-auto mb-4 bg-gradient-to-br from-primary/20 to-secondary/20 rounded-full flex items-center justify-center">
+                <Music className="text-muted-foreground" size={48} />
+              </div>
               <p className="text-muted-foreground text-lg">
                 No songs available
               </p>
@@ -203,56 +206,73 @@ export default function GuestArtistPage() {
               {artist.songs.map((song, index) => (
                 <div
                   key={song.id}
-                  className="flex items-center space-x-4 p-4 rounded-lg hover:bg-muted/50 cursor-pointer transition-colors group"
+                  className="flex items-center space-x-4 p-4 rounded-xl hover:bg-gradient-to-r hover:from-primary/5 hover:to-secondary/5 cursor-pointer transition-all duration-200 group hover:shadow-md border border-transparent hover:border-primary/20"
                   onClick={() => handleSongClick(song.id)}
                 >
                   {/* Track Number */}
                   <div className="w-8 text-center">
-                    <span className="text-muted-foreground group-hover:hidden">
+                    <span className="text-muted-foreground group-hover:hidden font-medium">
                       {index + 1}
                     </span>
-                    <Play
-                      className="hidden group-hover:block text-foreground mx-auto"
-                      size={16}
-                    />
+                    <div className="hidden group-hover:flex items-center justify-center w-8 h-8 bg-primary/10 rounded-full">
+                      <Play className="text-primary fill-current" size={14} />
+                    </div>
                   </div>
 
-                  {/* Song Cover */}
-                  <Image
-                    src={
-                      song.coverUrl ||
-                      "https://via.placeholder.com/50x50/6b46c1/ffffff?text=♪"
-                    }
-                    alt={song.title}
-                    width={50}
-                    height={50}
-                    className="rounded-lg"
-                  />
+                  {/* Enhanced Song Cover */}
+                  <div className="relative group/cover">
+                    <Image
+                      src={
+                        song.coverUrl ||
+                        "https://via.placeholder.com/64x64/6366f1/ffffff?text=♪"
+                      }
+                      alt={song.title}
+                      width={64}
+                      height={64}
+                      className="rounded-xl shadow-md transition-transform duration-200 group-hover:scale-105"
+                    />
+                    {/* Gradient overlay on hover */}
+                    <div className="absolute inset-0 bg-gradient-to-br from-primary/0 to-primary/20 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-200"></div>
+                    {/* Play icon overlay */}
+                    <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                      <div className="w-6 h-6 bg-white/90 rounded-full flex items-center justify-center shadow-lg">
+                        <Play className="text-primary fill-current" size={12} />
+                      </div>
+                    </div>
+                  </div>
 
                   {/* Song Info */}
                   <div className="flex-1 min-w-0">
-                    <p className="text-foreground font-medium truncate group-hover:text-primary transition-colors">
+                    <p className="text-foreground font-semibold truncate group-hover:text-primary transition-colors duration-200 text-lg">
                       {song.title}
                     </p>
-                    <div className="flex items-center space-x-2 text-sm text-muted-foreground">
-                      {song.album && <span>{song.album}</span>}
-                      {song.album && song.year && <span>•</span>}
-                      {song.year && <span>{song.year}</span>}
-                      {(song.album || song.year) && <span>•</span>}
-                      <span>{song.genre}</span>
+                    <div className="flex items-center space-x-2 text-sm text-muted-foreground mt-1">
+                      {song.album && (
+                        <span className="bg-muted/50 px-2 py-0.5 rounded-full text-xs">
+                          {song.album}
+                        </span>
+                      )}
+                      {song.year && (
+                        <span className="bg-muted/50 px-2 py-0.5 rounded-full text-xs">
+                          {song.year}
+                        </span>
+                      )}
+                      <span className="bg-gradient-to-r from-primary/10 to-secondary/10 text-primary px-2 py-0.5 rounded-full text-xs font-medium">
+                        {song.genre}
+                      </span>
                     </div>
                   </div>
 
                   {/* Play Count */}
-                  <div className="hidden md:flex items-center space-x-1 text-muted-foreground">
+                  <div className="hidden md:flex items-center space-x-2 text-muted-foreground bg-muted/30 px-3 py-1.5 rounded-full">
                     <Eye size={14} />
-                    <span className="text-sm">
+                    <span className="text-sm font-medium">
                       {song.playCount.toLocaleString()}
                     </span>
                   </div>
 
                   {/* Duration */}
-                  <div className="text-muted-foreground text-sm">
+                  <div className="text-muted-foreground text-sm font-mono bg-muted/30 px-3 py-1.5 rounded-full">
                     {formatTime(song.duration)}
                   </div>
                 </div>

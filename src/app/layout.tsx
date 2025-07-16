@@ -43,7 +43,7 @@ export const metadata: Metadata = {
     "rock music",
     "pop music",
     "classical music",
-    "world music"
+    "world music",
   ],
   authors: [{ name: "SangeetX Team", url: "https://sangeetx.online" }],
   creator: "SangeetX",
@@ -134,7 +134,7 @@ export default function RootLayout({
         <meta name="application-name" content="SangeetX" />
         <meta name="msapplication-TileColor" content="#8B5CF6" />
         <meta name="msapplication-config" content="/browserconfig.xml" />
-        
+
         {/* Structured Data for Music Platform */}
         <script
           type="application/ld+json"
@@ -142,40 +142,41 @@ export default function RootLayout({
             __html: JSON.stringify({
               "@context": "https://schema.org",
               "@type": "WebApplication",
-              "name": "SangeetX",
-              "description": "Modern music streaming platform for discovering, playing, and sharing music",
-              "url": "https://sangeetx.online",
-              "applicationCategory": "MusicApplication",
-              "operatingSystem": "Web",
-              "offers": {
+              name: "SangeetX",
+              description:
+                "Modern music streaming platform for discovering, playing, and sharing music",
+              url: "https://sangeetx.online",
+              applicationCategory: "MusicApplication",
+              operatingSystem: "Web",
+              offers: {
                 "@type": "Offer",
-                "price": "0",
-                "priceCurrency": "USD"
+                price: "0",
+                priceCurrency: "USD",
               },
-              "creator": {
+              creator: {
                 "@type": "Organization",
-                "name": "SangeetX Team"
+                name: "SangeetX Team",
               },
-              "featureList": [
+              featureList: [
                 "Music Streaming",
                 "Playlist Creation",
                 "Artist Discovery",
                 "High Quality Audio",
                 "Social Sharing",
                 "Karaoke Features",
-                "Music Search"
-              ]
-            })
+                "Music Search",
+              ],
+            }),
           }}
         />
-        
+
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link
           rel="preconnect"
           href="https://fonts.gstatic.com"
           crossOrigin=""
         />
-        
+
         {/* Preload critical resources */}
         <link rel="dns-prefetch" href="//sangeetx.online" />
         <link rel="preconnect" href="https://sangeetx.online" />

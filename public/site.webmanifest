@@ -19,7 +19,7 @@
       "form_factor": "wide"
     },
     {
-      "src": "/screenshot-narrow.png", 
+      "src": "/screenshot-narrow.png",
       "sizes": "750x1334",
       "type": "image/png",
       "form_factor": "narrow"
@@ -37,7 +37,7 @@
       "type": "image/png"
     },
     {
-      "src": "/favicon-32x32.png", 
+      "src": "/favicon-32x32.png",
       "sizes": "32x32",
       "type": "image/png"
     },
@@ -55,7 +55,7 @@
     },
     {
       "src": "/android-chrome-512x512.png",
-      "sizes": "512x512", 
+      "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"
     }
@@ -74,13 +74,13 @@
       ]
     },
     {
-      "name": "Browse Artists", 
+      "name": "Browse Artists",
       "short_name": "Artists",
       "description": "Discover new and popular artists",
       "url": "/guest/artists",
       "icons": [
         {
-          "src": "/artist-icon.png", 
+          "src": "/artist-icon.png",
           "sizes": "96x96"
         }
       ]
