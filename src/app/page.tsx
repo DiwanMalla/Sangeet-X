@@ -142,6 +142,12 @@ export default function HomePage() {
     }
   };
 
+  const handleSearch = () => {
+    if (searchQuery.trim()) {
+      router.push(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
+    }
+  };
+
   // Set duration when song changes
   useEffect(() => {
     if (currentSong) {
@@ -189,10 +195,19 @@ export default function HomePage() {
                       placeholder="Search for songs, artists, or albums..."
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter" && searchQuery.trim()) {
+                          handleSearch();
+                        }
+                      }}
                       className="pl-10 bg-white/10 border-white/20 text-white placeholder-purple-100"
                     />
                   </div>
-                  <Button className="ml-2 bg-white text-purple-600 hover:bg-gray-100">
+                  <Button
+                    className="ml-2 bg-white text-purple-600 hover:bg-gray-100"
+                    onClick={handleSearch}
+                    disabled={!searchQuery.trim()}
+                  >
                     <Search className="h-4 w-4" />
                   </Button>
                 </div>

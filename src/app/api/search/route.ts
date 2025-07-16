@@ -43,6 +43,13 @@ export async function GET(request: NextRequest) {
           { bio: { contains: query, mode: "insensitive" } },
         ],
       },
+      include: {
+        _count: {
+          select: {
+            songs: true,
+          },
+        },
+      },
       take: 10,
     });
 
