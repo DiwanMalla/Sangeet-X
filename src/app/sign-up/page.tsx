@@ -18,6 +18,31 @@ import Link from "next/link";
 export default function SignUpPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center p-4">
+      {/* Custom CSS for Clerk components */}
+      <style jsx global>{`
+        .cl-footerAction,
+        .cl-footerActionText,
+        .cl-footerActionLink,
+        .cl-footer,
+        .cl-footerPages,
+        .cl-footerPageLink,
+        .cl-footerText {
+          color: rgb(196 181 253) !important; /* purple-200 */
+        }
+
+        .cl-footerActionLink:hover,
+        .cl-footerPageLink:hover {
+          color: rgb(255 255 255) !important; /* white */
+        }
+
+        .cl-footerPages a {
+          color: rgb(196 181 253) !important; /* purple-200 */
+        }
+
+        .cl-footerPages a:hover {
+          color: rgb(255 255 255) !important; /* white */
+        }
+      `}</style>
       {/* Animated Background Effects */}
       <div className="absolute inset-0 opacity-20">
         <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-purple-500 rounded-full mix-blend-multiply filter blur-xl animate-pulse"></div>
@@ -171,7 +196,10 @@ export default function SignUpPage() {
                         "bg-white/10 border-white/20 text-white placeholder-purple-300 focus:border-purple-500 focus:ring-purple-500 rounded-lg",
                       formFieldLabel: "text-white font-medium",
                       footerActionLink:
-                        "text-purple-300 hover:text-white transition-colors",
+                        "text-purple-300 hover:text-white transition-colors !important",
+                      footerActionText:
+                        "text-purple-200 font-medium !important",
+                      footerAction: "text-purple-200 !important",
                       dividerLine: "bg-white/20",
                       dividerText: "text-purple-300",
                       formFieldInputShowPasswordButton:
@@ -179,6 +207,22 @@ export default function SignUpPage() {
                       identityPreviewText: "text-white",
                       identityPreviewEditButton:
                         "text-purple-300 hover:text-white",
+                      footer: "text-purple-200 !important",
+                      footerPages: "text-purple-200 !important",
+                      footerPageLink:
+                        "text-purple-300 hover:text-white !important",
+                      footerText: "text-purple-200 !important",
+                      modalCloseButton: "text-white",
+                      alternativeMethodsBlockButton:
+                        "text-purple-300 hover:text-white",
+                      alternativeMethodsBlockButtonText: "text-purple-300",
+                      userButtonPopoverText: "text-purple-200",
+                      userButtonPopoverActionButton:
+                        "text-purple-300 hover:text-white",
+                    },
+                    layout: {
+                      socialButtonsVariant: "blockButton",
+                      socialButtonsPlacement: "top",
                     },
                   }}
                   redirectUrl="/"

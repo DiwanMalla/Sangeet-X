@@ -9,6 +9,31 @@ import Link from "next/link";
 export default function LoginPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center p-4">
+      {/* Custom CSS for Clerk components */}
+      <style jsx global>{`
+        .cl-footerAction,
+        .cl-footerActionText,
+        .cl-footerActionLink,
+        .cl-footer,
+        .cl-footerPages,
+        .cl-footerPageLink,
+        .cl-footerText {
+          color: rgb(196 181 253) !important; /* purple-200 */
+        }
+
+        .cl-footerActionLink:hover,
+        .cl-footerPageLink:hover {
+          color: rgb(255 255 255) !important; /* white */
+        }
+
+        .cl-footerPages a {
+          color: rgb(196 181 253) !important; /* purple-200 */
+        }
+
+        .cl-footerPages a:hover {
+          color: rgb(255 255 255) !important; /* white */
+        }
+      `}</style>
       {/* Animated Background Effects */}
       <div className="absolute inset-0 opacity-20">
         <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-purple-500 rounded-full mix-blend-multiply filter blur-xl animate-pulse"></div>
@@ -126,10 +151,23 @@ export default function LoginPage() {
                       formFieldLabel: "text-gray-300",
                       dividerLine: "bg-white/20",
                       dividerText: "text-gray-400",
-                      footerActionLink: "text-purple-400 hover:text-purple-300",
+                      footerActionLink:
+                        "text-purple-300 hover:text-white !important",
+                      footerActionText:
+                        "text-purple-200 font-medium !important",
+                      footerAction: "text-purple-200 !important",
+                      footer: "text-purple-200 !important",
+                      footerPages: "text-purple-200 !important",
+                      footerPageLink:
+                        "text-purple-300 hover:text-white !important",
+                      footerText: "text-purple-200 !important",
                       identityPreviewText: "text-white",
                       formResendCodeLink:
                         "text-purple-400 hover:text-purple-300",
+                    },
+                    layout: {
+                      socialButtonsVariant: "blockButton",
+                      socialButtonsPlacement: "top",
                     },
                   }}
                   redirectUrl="/"

@@ -66,6 +66,8 @@ export default function GuestSongPage() {
   const [audio, setAudio] = useState<HTMLAudioElement | null>(null);
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [autoPlay, setAutoPlay] = useState(true);
+  const [showShareToast, setShowShareToast] = useState(false);
+  const [isSharing, setIsSharing] = useState(false);
   const currentAudioUrl = useRef<string | null>(null);
 
   // Load autoplay setting from localStorage on component mount
@@ -112,7 +114,26 @@ export default function GuestSongPage() {
 
   useEffect(() => {
     fetchSong();
-  }, [fetchSong]);
+
+    // Handle timestamp parameter from shared URLs
+    const urlParams = new URLSearchParams(window.location.search);
+    const timestamp = urlParams.get("t");
+    if (timestamp) {
+      const time = parseInt(timestamp, 10);
+      if (!isNaN(time) && time > 0) {
+        // Wait for audio to load before seeking
+        const checkAudioAndSeek = () => {
+          if (audio && duration > 0) {
+            audio.currentTime = Math.min(time, duration);
+            setCurrentTime(time);
+          } else {
+            setTimeout(checkAudioAndSeek, 100);
+          }
+        };
+        checkAudioAndSeek();
+      }
+    }
+  }, [fetchSong, audio, duration]);
 
   // Simple navigation functions - components will handle playlist logic
   const playNextSong = useCallback(() => {
@@ -260,6 +281,131 @@ export default function GuestSongPage() {
 
   const toggleAutoPlay = () => {
     setAutoPlay((prev) => !prev);
+  };
+
+  const handleShare = async () => {
+    if (!songData?.song || isSharing) return;
+
+    setIsSharing(true);
+
+    const { song } = songData;
+    const shareUrl = window.location.href;
+
+    // Add current timestamp if song is playing
+    const timestampParam =
+      isPlaying && currentTime > 0 ? `?t=${Math.floor(currentTime)}` : "";
+    const fullShareUrl = `${shareUrl}${timestampParam}`;
+
+    // Create a rich text format for sharing
+    const shareTitle = `🎵 ${song.title} - ${song.artist.name}`;
+    const shareText = `🎵 Listen to "${song.title}" by ${
+      song.artist.name
+    } on SangeetX!
+
+🎤 Artist: ${song.artist.name}
+🎼 Genre: ${song.genre}${
+      song.album
+        ? `
+💿 Album: ${song.album}`
+        : ""
+    }${
+      song.year
+        ? `
+📅 Year: ${song.year}`
+        : ""
+    }
+⏱️ Duration: ${formatTime(song.duration)}
+👁️ ${song.playCount.toLocaleString()} plays${
+      isPlaying && currentTime > 0
+        ? `
+� Playing at: ${formatTime(currentTime)}`
+        : ""
+    }
+
+�🔗 Listen now: ${fullShareUrl}
+
+#SangeetX #Music #${song.genre.replace(/\s+/g, "")}`;
+
+    try {
+      // Try Web Share API first (mobile friendly) with file support
+      if (navigator.share) {
+        const shareData: ShareData = {
+          title: shareTitle,
+          text: shareText,
+          url: fullShareUrl,
+        };
+
+        // Try to include image if possible
+        if (song.coverUrl && navigator.canShare) {
+          try {
+            const response = await fetch(song.coverUrl);
+            const blob = await response.blob();
+            const file = new File([blob], `${song.title}-cover.jpg`, {
+              type: blob.type,
+            });
+
+            if (navigator.canShare({ files: [file] })) {
+              shareData.files = [file];
+            }
+          } catch (error) {
+            console.log("Could not include image in share:", error);
+          }
+        }
+
+        await navigator.share(shareData);
+        setShowShareToast(true);
+        setTimeout(() => setShowShareToast(false), 3000);
+        setIsSharing(false);
+        return;
+      }
+
+      // Fallback to clipboard with rich text
+      await navigator.clipboard.writeText(shareText);
+      setShowShareToast(true);
+      setTimeout(() => setShowShareToast(false), 3000);
+    } catch (error) {
+      console.error("Error sharing:", error);
+
+      // Final fallback for older browsers
+      try {
+        const textArea = document.createElement("textarea");
+        textArea.value = shareText;
+        textArea.style.position = "fixed";
+        textArea.style.opacity = "0";
+        document.body.appendChild(textArea);
+        textArea.select();
+        document.execCommand("copy");
+        document.body.removeChild(textArea);
+        setShowShareToast(true);
+        setTimeout(() => setShowShareToast(false), 3000);
+      } catch (fallbackError) {
+        console.error("Fallback copy failed:", fallbackError);
+        // Create a modal with the share text for manual copying
+        const shareModal = document.createElement("div");
+        shareModal.style.cssText = `
+          position: fixed;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%);
+          background: rgba(0, 0, 0, 0.9);
+          color: white;
+          padding: 20px;
+          border-radius: 10px;
+          z-index: 1000;
+          max-width: 90%;
+          max-height: 80%;
+          overflow: auto;
+        `;
+        shareModal.innerHTML = `
+          <h3 style="margin-bottom: 10px;">Share this song</h3>
+          <textarea readonly style="width: 100%; height: 200px; background: rgba(255,255,255,0.1); color: white; border: 1px solid rgba(255,255,255,0.2); border-radius: 5px; padding: 10px;">${shareText}</textarea>
+          <button onclick="this.parentElement.remove()" style="margin-top: 10px; padding: 10px 20px; background: #7c3aed; color: white; border: none; border-radius: 5px; cursor: pointer;">Close</button>
+        `;
+        document.body.appendChild(shareModal);
+      }
+    }
+
+    setIsSharing(false);
   };
 
   if (loading || isTransitioning) {
@@ -477,9 +623,20 @@ export default function GuestSongPage() {
                   <Heart size={16} />
                   <span>Like</span>
                 </button>
-                <button className="flex items-center space-x-2 text-purple-200/70 hover:text-white transition-colors">
-                  <Share2 size={16} />
-                  <span>Share</span>
+                <button
+                  onClick={handleShare}
+                  disabled={isSharing}
+                  className={`flex items-center space-x-2 transition-colors ${
+                    isSharing
+                      ? "text-purple-400 cursor-not-allowed"
+                      : "text-purple-200/70 hover:text-white"
+                  }`}
+                >
+                  <Share2
+                    size={16}
+                    className={isSharing ? "animate-pulse" : ""}
+                  />
+                  <span>{isSharing ? "Sharing..." : "Share"}</span>
                 </button>
               </div>
             </div>
@@ -592,6 +749,18 @@ export default function GuestSongPage() {
           </div>
         </div>
       </div>
+
+      {/* Share Toast Notification */}
+      {showShareToast && (
+        <div className="fixed top-4 right-4 z-50 bg-green-600/90 backdrop-blur-sm border border-green-500/50 text-white px-6 py-3 rounded-lg shadow-2xl animate-in slide-in-from-right-full duration-300">
+          <div className="flex items-center space-x-2">
+            <div className="w-2 h-2 bg-green-300 rounded-full"></div>
+            <span className="font-medium">
+              Song details copied to clipboard!
+            </span>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
