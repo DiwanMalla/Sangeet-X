@@ -114,6 +114,54 @@ export default function LandingPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
+      {/* SEO Structured Data */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "WebSite",
+            "name": "SangeetX",
+            "description": "Modern music streaming platform for discovering, playing, and sharing music",
+            "url": "https://sangeetx.online",
+            "potentialAction": {
+              "@type": "SearchAction",
+              "target": "https://sangeetx.online/search?q={search_term_string}",
+              "query-input": "required name=search_term_string"
+            },
+            "sameAs": [
+              "https://twitter.com/sangeetx",
+              "https://facebook.com/sangeetx",
+              "https://instagram.com/sangeetx"
+            ]
+          })
+        }}
+      />
+      
+      {/* Music Service Schema */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "Service",
+            "serviceType": "Music Streaming",
+            "provider": {
+              "@type": "Organization",
+              "name": "SangeetX"
+            },
+            "name": "SangeetX Music Streaming",
+            "description": "Stream unlimited music, discover new artists, and create personalized playlists",
+            "offers": {
+              "@type": "Offer",
+              "price": "0",
+              "priceCurrency": "USD",
+              "availability": "https://schema.org/InStock"
+            }
+          })
+        }}
+      />
+      
       {/* Copyright Notice Popup */}
       {showCopyrightNotice && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">

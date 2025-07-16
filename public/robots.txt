@@ -1,0 +1,38 @@
+# Robots.txt for SangeetX - Music Streaming Platform
+# https://sangeetx.online/robots.txt
+
+User-agent: *
+Allow: /
+
+# Disallow admin and private areas
+Disallow: /admin/
+Disallow: /api/
+Disallow: /_next/
+Disallow: /private/
+
+# Allow important pages for SEO
+Allow: /
+Allow: /landing
+Allow: /search
+Allow: /guest/
+Allow: /login
+Allow: /sign-up
+
+# Sitemap location
+Sitemap: https://sangeetx.online/sitemap.xml
+
+# Crawl-delay for respectful crawling
+Crawl-delay: 1
+
+# Special instructions for major search engines
+User-agent: Googlebot
+Allow: /
+Crawl-delay: 1
+
+User-agent: Bingbot
+Allow: /
+Crawl-delay: 1
+
+User-agent: Slurp
+Allow: /
+Crawl-delay: 1
