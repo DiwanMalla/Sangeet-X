@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, useCallback } from "react";
 import Image from "next/image";
 import { cn, formatTime } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -56,9 +56,59 @@ export default function AudioPlayer({
 }: AudioPlayerProps) {
   const [isExpanded, setIsExpanded] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
+  const [isAudioUnlocked, setIsAudioUnlocked] = useState(false);
+  const [showMobilePlayPrompt, setShowMobilePlayPrompt] = useState(false);
   const progressRef = useRef<HTMLDivElement>(null);
   const volumeRef = useRef<HTMLDivElement>(null);
   const audioRef = useRef<HTMLAudioElement>(null);
+
+  // Detect mobile device
+  const isMobile =
+    typeof window !== "undefined" &&
+    /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+      navigator.userAgent
+    );
+
+  // Unlock audio context on first user interaction (mobile fix)
+  const unlockAudioContext = useCallback(async () => {
+    const audio = audioRef.current;
+    if (!audio || isAudioUnlocked) return;
+
+    try {
+      // Create a silent audio play to unlock the audio context
+      const silentAudio = new Audio(
+        "data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhBDuBzvLZiDYIF2m98OWhTgwNVKfo6KlUFApGnt/yvmwjBDqPz/LZhzUGG2i47+OeSwsNV6Tn6KlSFAlFnt/yv2skBDuGz/LYhzQIGGi49+OSUQoOVKXl8KtRGAhCnN/xv2wkBjaOzvLZhzUGG2i59uOeSwsOV6Tl8KxQFwlFnt/yv2wkBTuEz/LZhzUGG2i49+OeSwsNVqXl8KtQFQhFnt7yv2oj"
+      );
+      silentAudio.volume = 0;
+      await silentAudio.play();
+      setIsAudioUnlocked(true);
+
+      // Pre-load the current song
+      if (currentSong && audio) {
+        audio.src = currentSong.audioUrl;
+        audio.load();
+      }
+    } catch (error) {
+      console.log("Audio unlock failed:", error);
+    }
+  }, [isAudioUnlocked, currentSong]);
+
+  // Mobile play attempt handler
+  const handleMobilePlay = async () => {
+    if (!isMobile || isAudioUnlocked) {
+      onPlayPause();
+      return;
+    }
+
+    try {
+      await unlockAudioContext();
+      setShowMobilePlayPrompt(false);
+      onPlayPause();
+    } catch (error) {
+      console.error("Failed to start playback:", error);
+      setShowMobilePlayPrompt(true);
+    }
+  };
 
   // Audio event handlers
   useEffect(() => {
@@ -88,6 +138,25 @@ export default function AudioPlayer({
     };
   }, [onSeek, onNext]);
 
+  // Global click handler to unlock audio on first interaction (mobile)
+  useEffect(() => {
+    if (!isMobile || isAudioUnlocked) return;
+
+    const handleFirstInteraction = () => {
+      unlockAudioContext();
+      document.removeEventListener("click", handleFirstInteraction);
+      document.removeEventListener("touchend", handleFirstInteraction);
+    };
+
+    document.addEventListener("click", handleFirstInteraction);
+    document.addEventListener("touchend", handleFirstInteraction);
+
+    return () => {
+      document.removeEventListener("click", handleFirstInteraction);
+      document.removeEventListener("touchend", handleFirstInteraction);
+    };
+  }, [isMobile, isAudioUnlocked, unlockAudioContext]);
+
   // Update audio source when song changes
   useEffect(() => {
     const audio = audioRef.current;
@@ -95,19 +164,43 @@ export default function AudioPlayer({
 
     audio.src = currentSong.audioUrl;
     audio.load();
-  }, [currentSong]);
 
-  // Handle play/pause
+    // For mobile, preload but don't autoplay
+    if (isMobile && !isAudioUnlocked) {
+      audio.preload = "metadata";
+    }
+  }, [currentSong, isMobile, isAudioUnlocked]);
+
+  // Handle play/pause with mobile considerations
   useEffect(() => {
     const audio = audioRef.current;
     if (!audio) return;
 
-    if (isPlaying) {
-      audio.play().catch(console.error);
-    } else {
-      audio.pause();
-    }
-  }, [isPlaying]);
+    const attemptPlay = async () => {
+      if (isPlaying) {
+        // On mobile, show prompt if audio isn't unlocked yet
+        if (isMobile && !isAudioUnlocked) {
+          setShowMobilePlayPrompt(true);
+          return;
+        }
+
+        try {
+          await audio.play();
+          setShowMobilePlayPrompt(false);
+        } catch (error) {
+          console.error("Playback failed:", error);
+          if (isMobile) {
+            setShowMobilePlayPrompt(true);
+          }
+        }
+      } else {
+        audio.pause();
+        setShowMobilePlayPrompt(false);
+      }
+    };
+
+    attemptPlay();
+  }, [isPlaying, isMobile, isAudioUnlocked]);
 
   // Handle volume changes
   useEffect(() => {
@@ -211,7 +304,7 @@ export default function AudioPlayer({
             <Button
               variant="ghost"
               size="icon"
-              onClick={onPlayPause}
+              onClick={handleMobilePlay}
               className="text-white hover:bg-gray-800"
             >
               {isPlaying ? (
@@ -279,7 +372,7 @@ export default function AudioPlayer({
               <Button
                 variant="ghost"
                 size="icon"
-                onClick={onPlayPause}
+                onClick={handleMobilePlay}
                 className="text-white hover:bg-gray-800 p-3"
               >
                 {isPlaying ? (
@@ -400,7 +493,7 @@ export default function AudioPlayer({
               <Button
                 variant="ghost"
                 size="icon"
-                onClick={onPlayPause}
+                onClick={handleMobilePlay}
                 className="text-white hover:bg-gray-800 p-3"
               >
                 {isPlaying ? (
@@ -479,6 +572,41 @@ export default function AudioPlayer({
           </div>
         </div>
       </div>
+
+      {/* Mobile Play Prompt */}
+      {showMobilePlayPrompt && isMobile && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[60] p-4">
+          <div className="bg-gray-800 rounded-lg p-6 max-w-sm w-full text-center border border-gray-700">
+            <div className="mb-4">
+              <div className="w-16 h-16 bg-purple-600 rounded-full flex items-center justify-center mx-auto mb-3">
+                <Play className="h-8 w-8 text-white" />
+              </div>
+              <h3 className="text-lg font-semibold text-white mb-2">
+                Tap to Start Playing
+              </h3>
+              <p className="text-gray-400 text-sm">
+                Mobile browsers require a tap to start audio playback
+              </p>
+            </div>
+            <div className="flex gap-3">
+              <Button
+                onClick={() => setShowMobilePlayPrompt(false)}
+                variant="outline"
+                className="flex-1 border-gray-600 text-gray-300 hover:bg-gray-700"
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={handleMobilePlay}
+                className="flex-1 bg-purple-600 hover:bg-purple-700 text-white"
+              >
+                <Play className="h-4 w-4 mr-2" />
+                Play
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
