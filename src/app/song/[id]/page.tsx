@@ -2,19 +2,21 @@
 
 import React, { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
+import { useUser } from "@clerk/nextjs";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import Navbar from "@/components/layout/navbar";
 import { useAudio } from "@/components/layout/app-layout";
 import KaraokeSubtitleDisplay from "@/components/ui/karaoke-subtitle-display";
+import { usePlayHistory } from "@/lib/use-play-history";
+import LikeButton from "@/components/ui/like-button";
 import {
   Play,
   Pause,
   Languages,
   RefreshCw,
   ArrowLeft,
-  Heart,
   MoreVertical,
   Plus,
   Music,
@@ -49,7 +51,9 @@ interface Playlist {
 export default function SongPage() {
   const params = useParams();
   const router = useRouter();
+  const { user } = useUser();
   const audio = useAudio();
+  const { trackPlay } = usePlayHistory();
   const [song, setSong] = useState<Song | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -64,7 +68,7 @@ export default function SongPage() {
   const [newPlaylistName, setNewPlaylistName] = useState("");
 
   // Mock user ID - in a real app, this would come from authentication
-  const mockUserId = "mock-user-id";
+  const userId = user?.id || "mock-user-id";
 
   const [subtitles, setSubtitles] = useState<{
     english: Array<{ time: number; text: string; endTime: number }>;
@@ -86,8 +90,8 @@ export default function SongPage() {
         ] = await Promise.all([
           fetch(`/api/songs/${params.id}`),
           fetch(`/api/subtitles?songId=${params.id}`),
-          fetch(`/api/favorites?userId=${mockUserId}`),
-          fetch(`/api/playlists?userId=${mockUserId}`),
+          fetch(`/api/favorites?userId=${userId}`),
+          fetch(`/api/playlists?userId=${userId}`),
         ]);
 
         if (!songResponse.ok) {
@@ -156,40 +160,13 @@ export default function SongPage() {
     if (params.id) {
       fetchSong();
     }
-  }, [params.id, mockUserId]);
+  }, [params.id, userId]);
 
   const handlePlaySong = () => {
     if (song) {
       audio.onPlaySong(song);
-    }
-  };
-
-  const handleLikeToggle = async () => {
-    try {
-      if (isLiked) {
-        // Remove from favorites
-        const response = await fetch(
-          `/api/favorites?userId=${mockUserId}&songId=${params.id}`,
-          {
-            method: "DELETE",
-          }
-        );
-        if (response.ok) {
-          setIsLiked(false);
-        }
-      } else {
-        // Add to favorites
-        const response = await fetch("/api/favorites", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ userId: mockUserId, songId: params.id }),
-        });
-        if (response.ok) {
-          setIsLiked(true);
-        }
-      }
-    } catch (error) {
-      console.error("Error toggling like:", error);
+      // Track the play
+      trackPlay(song.id);
     }
   };
 
@@ -216,7 +193,7 @@ export default function SongPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           name: newPlaylistName,
-          userId: mockUserId,
+          userId: userId,
           isPublic: false,
         }),
       });
@@ -252,7 +229,7 @@ export default function SongPage() {
     return (
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
         <Navbar />
-        <main className="lg:ml-72 p-8">
+        <main className="lg:ml-72 p-8 pb-24 lg:pb-32">
           <div className="text-center">
             <p className="text-red-600 mb-4">{error || "Song not found"}</p>
             <Button onClick={() => router.back()}>Go Back</Button>
@@ -265,7 +242,7 @@ export default function SongPage() {
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <Navbar />
-      <main className="lg:ml-72 p-8">
+      <main className="lg:ml-72 p-8 pb-24 lg:pb-32">
         {/* Header */}
         <div className="mb-8">
           <Button
@@ -361,23 +338,12 @@ export default function SongPage() {
                   <div className="flex items-center justify-between pt-4 border-t border-gray-200 dark:border-gray-700">
                     <div className="flex items-center space-x-3">
                       {/* Like Button */}
-                      <Button
-                        variant={isLiked ? "default" : "outline"}
+                      <LikeButton
+                        songId={song.id}
+                        initialLiked={isLiked}
+                        onLikeChange={(liked: boolean) => setIsLiked(liked)}
                         size="sm"
-                        onClick={handleLikeToggle}
-                        className={
-                          isLiked
-                            ? "bg-red-500 hover:bg-red-600 text-white"
-                            : ""
-                        }
-                      >
-                        <Heart
-                          className={`h-4 w-4 mr-2 ${
-                            isLiked ? "fill-current" : ""
-                          }`}
-                        />
-                        {isLiked ? "Liked" : "Like"}
-                      </Button>
+                      />
 
                       {/* Play Count */}
                       <div className="flex items-center space-x-1 text-sm text-gray-500 dark:text-gray-400">

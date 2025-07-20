@@ -7,24 +7,26 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
+import LikeButton from "@/components/ui/like-button";
 import Navbar from "@/components/layout/navbar";
 import AudioPlayer from "@/components/layout/audio-player";
 import {
   Play,
   Search,
   Clock,
-  Heart,
   TrendingUp,
   Music2,
   PlayCircle,
 } from "lucide-react";
 import { Song, Genre } from "@/lib/types";
-import { cn, formatTime } from "@/lib/utils";
+import { formatTime } from "@/lib/utils";
 import { useUser } from "@clerk/nextjs";
+import { usePlayHistory } from "@/lib/use-play-history";
 
 export default function HomePage() {
   const router = useRouter();
   const { isSignedIn, isLoaded } = useUser();
+  const { trackPlay } = usePlayHistory();
   const [currentSong, setCurrentSong] = useState<Song | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [volume, setVolume] = useState(0.7);
@@ -92,6 +94,9 @@ export default function HomePage() {
     setIsPlaying(true);
     setQueue(queue.length > 0 ? queue : [song]);
     setCurrentIndex(queue.findIndex((s) => s.id === song.id));
+
+    // Track the play
+    trackPlay(song.id);
   };
 
   const handlePlayPause = () => {
@@ -287,13 +292,10 @@ export default function HomePage() {
                                 <span className="text-xs text-gray-400">
                                   {formatTime(song.duration)}
                                 </span>
-                                <Heart
-                                  className={cn(
-                                    "h-3 w-3",
-                                    song.isLiked
-                                      ? "text-red-500 fill-red-500"
-                                      : "text-gray-400"
-                                  )}
+                                <LikeButton
+                                  songId={song.id}
+                                  variant="icon"
+                                  size="sm"
                                 />
                               </div>
                             </div>
@@ -382,13 +384,10 @@ export default function HomePage() {
                           </p>
                         </div>
                         <div className="flex items-center space-x-2">
-                          <Heart
-                            className={cn(
-                              "h-4 w-4",
-                              song.isLiked
-                                ? "text-red-500 fill-red-500"
-                                : "text-gray-400"
-                            )}
+                          <LikeButton
+                            songId={song.id}
+                            variant="icon"
+                            size="sm"
                           />
                           <span className="text-sm text-gray-400">
                             {formatTime(song.duration)}

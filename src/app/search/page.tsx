@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import Navbar from "@/components/layout/navbar";
+import LikeButton from "@/components/ui/like-button";
 import {
   Search,
   Music,
@@ -318,6 +319,12 @@ function SearchPageContent() {
                         </p>
                       </div>
                       <div className="flex items-center gap-4">
+                        <LikeButton
+                          songId={song.id}
+                          initialLiked={false}
+                          variant="icon"
+                          size="sm"
+                        />
                         <div className="text-gray-400 text-sm">
                           {song.playCount.toLocaleString()} plays
                         </div>
