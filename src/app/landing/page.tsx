@@ -51,6 +51,9 @@ interface Artist {
 export default function LandingPage() {
   const router = useRouter();
   const [popularSongs, setPopularSongs] = useState<Song[]>([]);
+  const [allPopularSongs, setAllPopularSongs] = useState<Song[]>([]);
+  const [showAllSongs, setShowAllSongs] = useState(false);
+  const [loadingAllSongs, setLoadingAllSongs] = useState(false);
   const [popularArtists, setPopularArtists] = useState<Artist[]>([]);
   const [availableGenres, setAvailableGenres] = useState<ApiGenre[]>([]);
   const [showCopyrightNotice, setShowCopyrightNotice] = useState(false);
@@ -111,6 +114,23 @@ export default function LandingPage() {
 
     fetchData();
   }, []);
+
+  const fetchAllPopularSongs = async () => {
+    try {
+      setLoadingAllSongs(true);
+      const response = await fetch("/api/guest/songs?limit=50"); // Fetch more songs
+      const data = await response.json();
+
+      if (data.success) {
+        setAllPopularSongs(data.data.songs);
+        setShowAllSongs(true);
+      }
+    } catch (error) {
+      console.error("Error fetching all popular songs:", error);
+    } finally {
+      setLoadingAllSongs(false);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
@@ -327,7 +347,7 @@ export default function LandingPage() {
 
       {/* Genres Section */}
       <section
-        id="features"
+        id="genres"
         className="py-24 bg-gradient-to-b from-black/30 to-black/50 backdrop-blur-sm"
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -425,15 +445,47 @@ export default function LandingPage() {
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-16">
             {/* Popular Songs */}
-            <div className="backdrop-blur-sm bg-white/5 rounded-3xl p-8 border border-white/10">
-              <div className="flex items-center mb-8">
-                <div className="w-12 h-12 bg-gradient-to-r from-yellow-500 to-orange-500 rounded-2xl flex items-center justify-center mr-4">
-                  <Star className="w-6 h-6 text-white" />
+            <div className="backdrop-blur-sm bg-white/5 rounded-3xl p-8 border border-white/10 flex flex-col">
+              <div className="flex items-center justify-between mb-8">
+                <div className="flex items-center">
+                  <div className="w-12 h-12 bg-gradient-to-r from-yellow-500 to-orange-500 rounded-2xl flex items-center justify-center mr-4">
+                    <Star className="w-6 h-6 text-white" />
+                  </div>
+                  <h3 className="text-3xl font-bold text-white">
+                    Popular Songs
+                  </h3>
                 </div>
-                <h3 className="text-3xl font-bold text-white">Popular Songs</h3>
+                {!showAllSongs && popularSongs.length > 0 && (
+                  <Button
+                    variant="ghost"
+                    onClick={fetchAllPopularSongs}
+                    disabled={loadingAllSongs}
+                    className="text-purple-400 hover:text-white hover:bg-white/10 text-sm"
+                  >
+                    {loadingAllSongs ? "Loading..." : "See All"}
+                  </Button>
+                )}
+                {showAllSongs && (
+                  <Button
+                    variant="ghost"
+                    onClick={() => setShowAllSongs(false)}
+                    className="text-purple-400 hover:text-white hover:bg-white/10 text-sm"
+                  >
+                    Show Less
+                  </Button>
+                )}
               </div>
 
-              <div className="space-y-4">
+              <div
+                className={`space-y-4 ${
+                  showAllSongs
+                    ? "flex-1 min-h-0 max-h-[60vh] overflow-y-auto scrollbar-thin scrollbar-track-transparent scrollbar-thumb-purple-400/30 hover:scrollbar-thumb-purple-400/50 relative"
+                    : ""
+                }`}
+              >
+                {showAllSongs && allPopularSongs.length > 8 && (
+                  <div className="absolute bottom-0 left-0 right-0 h-8 bg-gradient-to-t from-slate-800/50 to-transparent pointer-events-none z-10"></div>
+                )}
                 {loading.songs ? (
                   // Loading skeletons for songs
                   Array.from({ length: 5 }).map((_, index) => (
@@ -466,72 +518,75 @@ export default function LandingPage() {
                       </CardContent>
                     </Card>
                   ))
-                ) : popularSongs.length > 0 ? (
-                  popularSongs.map((song, index) => (
-                    <Card
-                      key={song.id}
-                      className="bg-white/5 border-white/10 hover:bg-white/10 transition-all duration-300 cursor-pointer group"
-                      onClick={() => router.push(`/guest/songs/${song.id}`)}
-                    >
-                      <CardContent className="p-4">
-                        <div className="flex items-center space-x-4">
-                          {/* Rank Number */}
-                          <div className="w-8 h-8 text-purple-400 font-bold flex items-center justify-center text-sm">
-                            #{index + 1}
-                          </div>
-
-                          {/* Song Thumbnail */}
-                          <div className="relative">
-                            <Image
-                              src={
-                                song.coverUrl ||
-                                "https://via.placeholder.com/48x48/6b46c1/ffffff?text=♪"
-                              }
-                              alt={song.title}
-                              width={48}
-                              height={48}
-                              className="w-12 h-12 object-cover rounded-lg"
-                            />
-                            <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity rounded-lg flex items-center justify-center">
-                              <Play className="w-4 h-4 text-white hidden sm:block" />
+                ) : (showAllSongs ? allPopularSongs : popularSongs).length >
+                  0 ? (
+                  (showAllSongs ? allPopularSongs : popularSongs).map(
+                    (song, index) => (
+                      <Card
+                        key={song.id}
+                        className="bg-white/5 border-white/10 hover:bg-white/10 transition-all duration-300 cursor-pointer group"
+                        onClick={() => router.push(`/guest/songs/${song.id}`)}
+                      >
+                        <CardContent className="p-4">
+                          <div className="flex items-center space-x-4">
+                            {/* Rank Number */}
+                            <div className="w-8 h-8 text-purple-400 font-bold flex items-center justify-center text-sm">
+                              #{index + 1}
                             </div>
-                          </div>
 
-                          {/* Song Info */}
-                          <div className="flex-1 min-w-0">
-                            <h3 className="text-white font-semibold truncate">
-                              {song.title}
-                            </h3>
-                            <p className="text-purple-300 text-sm truncate">
-                              {song.artist.name}
-                              {song.album && (
-                                <span className="text-purple-400">
-                                  {" "}
-                                  • {song.album}
-                                </span>
-                              )}
-                            </p>
-                          </div>
+                            {/* Song Thumbnail */}
+                            <div className="relative">
+                              <Image
+                                src={
+                                  song.coverUrl ||
+                                  "https://via.placeholder.com/48x48/6b46c1/ffffff?text=♪"
+                                }
+                                alt={song.title}
+                                width={48}
+                                height={48}
+                                className="w-12 h-12 object-cover rounded-lg"
+                              />
+                              <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity rounded-lg flex items-center justify-center">
+                                <Play className="w-4 h-4 text-white hidden sm:block" />
+                              </div>
+                            </div>
 
-                          {/* Duration - hidden on small screens */}
-                          <div className="text-purple-400 text-sm font-mono hidden md:block">
-                            {Math.floor(song.duration / 60)}:
-                            {(song.duration % 60).toString().padStart(2, "0")}
-                          </div>
+                            {/* Song Info */}
+                            <div className="flex-1 min-w-0">
+                              <h3 className="text-white font-semibold truncate">
+                                {song.title}
+                              </h3>
+                              <p className="text-purple-300 text-sm truncate">
+                                {song.artist.name}
+                                {song.album && (
+                                  <span className="text-purple-400">
+                                    {" "}
+                                    • {song.album}
+                                  </span>
+                                )}
+                              </p>
+                            </div>
 
-                          {/* Play Count - hidden on smaller screens */}
-                          <div className="text-purple-400 text-sm hidden lg:block">
-                            {song.playCount >= 1000
-                              ? `${Math.floor(song.playCount / 1000)}K`
-                              : song.playCount}
-                          </div>
+                            {/* Duration - hidden on small screens */}
+                            <div className="text-purple-400 text-sm font-mono hidden md:block">
+                              {Math.floor(song.duration / 60)}:
+                              {(song.duration % 60).toString().padStart(2, "0")}
+                            </div>
 
-                          {/* Play Button - hidden on small screens */}
-                          <PlayCircle className="w-6 h-6 text-purple-400 hover:text-white transition-colors opacity-70 group-hover:opacity-100 hidden sm:block" />
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))
+                            {/* Play Count - hidden on smaller screens */}
+                            <div className="text-purple-400 text-sm hidden lg:block">
+                              {song.playCount >= 1000
+                                ? `${Math.floor(song.playCount / 1000)}K`
+                                : song.playCount}
+                            </div>
+
+                            {/* Play Button - hidden on small screens */}
+                            <PlayCircle className="w-6 h-6 text-purple-400 hover:text-white transition-colors opacity-70 group-hover:opacity-100 hidden sm:block" />
+                          </div>
+                        </CardContent>
+                      </Card>
+                    )
+                  )
                 ) : (
                   <div className="text-center py-12">
                     <Star className="mx-auto text-slate-600 mb-4" size={48} />

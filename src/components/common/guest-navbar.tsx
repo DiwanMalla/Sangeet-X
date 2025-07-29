@@ -59,7 +59,16 @@ export default function GuestNavbar({
                   Home
                 </button>
                 <button
-                  onClick={() => router.push("/guest/genres")}
+                  onClick={() => {
+                    router.push("/landing");
+                    // Small delay to ensure page loads before scrolling
+                    setTimeout(() => {
+                      const genresSection = document.getElementById("genres");
+                      if (genresSection) {
+                        genresSection.scrollIntoView({ behavior: "smooth" });
+                      }
+                    }, 100);
+                  }}
                   className={`transition-colors ${
                     currentPage === "genres"
                       ? "text-purple-400"
@@ -69,13 +78,30 @@ export default function GuestNavbar({
                   Genres
                 </button>
                 <button
-                  onClick={() => router.push("/landing#discover")}
+                  onClick={() => {
+                    router.push("/landing");
+                    setTimeout(() => {
+                      const discoverSection =
+                        document.getElementById("discover");
+                      if (discoverSection) {
+                        discoverSection.scrollIntoView({ behavior: "smooth" });
+                      }
+                    }, 100);
+                  }}
                   className="text-white hover:text-purple-300 transition-colors"
                 >
                   Discover
                 </button>
                 <button
-                  onClick={() => router.push("/landing#about")}
+                  onClick={() => {
+                    router.push("/landing");
+                    setTimeout(() => {
+                      const aboutSection = document.getElementById("about");
+                      if (aboutSection) {
+                        aboutSection.scrollIntoView({ behavior: "smooth" });
+                      }
+                    }, 100);
+                  }}
                   className="text-white hover:text-purple-300 transition-colors"
                 >
                   About

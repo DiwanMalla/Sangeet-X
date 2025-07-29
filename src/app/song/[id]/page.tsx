@@ -66,6 +66,7 @@ export default function SongPage() {
   const [playlists, setPlaylists] = useState<Playlist[]>([]);
   const [showCreatePlaylist, setShowCreatePlaylist] = useState(false);
   const [newPlaylistName, setNewPlaylistName] = useState("");
+  const [isLoadingQueue, setIsLoadingQueue] = useState(false);
 
   // Mock user ID - in a real app, this would come from authentication
   const userId = user?.id || "mock-user-id";
@@ -162,9 +163,36 @@ export default function SongPage() {
     }
   }, [params.id, userId]);
 
-  const handlePlaySong = () => {
+  const handlePlaySong = async () => {
     if (song) {
-      audio.onPlaySong(song);
+      setIsLoadingQueue(true);
+      // Fetch all songs to create a queue
+      try {
+        const response = await fetch("/api/songs");
+        if (response.ok) {
+          const data = await response.json();
+          if (data.success) {
+            const allSongs = data.data;
+
+            // Set up the queue with all songs
+            audio.setQueue(allSongs);
+            audio.onPlaySong(song);
+          } else {
+            // Fallback: play single song
+            audio.onPlaySong(song);
+          }
+        } else {
+          // Fallback: play single song
+          audio.onPlaySong(song);
+        }
+      } catch (error) {
+        console.error("Error fetching songs for queue:", error);
+        // Fallback: play single song
+        audio.onPlaySong(song);
+      } finally {
+        setIsLoadingQueue(false);
+      }
+
       // Track the play
       trackPlay(song.id);
     }
@@ -277,9 +305,12 @@ export default function SongPage() {
                 <Button
                   size="icon"
                   onClick={isCurrentSong ? audio.onPlayPause : handlePlaySong}
-                  className="h-16 w-16 rounded-full bg-white/90 hover:bg-white text-black shadow-lg transform hover:scale-105 transition-all duration-200"
+                  disabled={isLoadingQueue}
+                  className="h-16 w-16 rounded-full bg-white/90 hover:bg-white text-black shadow-lg transform hover:scale-105 transition-all duration-200 disabled:opacity-70 disabled:hover:scale-100"
                 >
-                  {isCurrentSong && audio.isPlaying ? (
+                  {isLoadingQueue ? (
+                    <RefreshCw className="h-8 w-8 animate-spin" />
+                  ) : isCurrentSong && audio.isPlaying ? (
                     <Pause className="h-8 w-8" />
                   ) : (
                     <Play className="h-8 w-8 ml-1" />

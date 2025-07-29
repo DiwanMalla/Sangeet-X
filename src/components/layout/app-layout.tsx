@@ -59,8 +59,23 @@ export default function AppLayout({ children }: AppLayoutProps) {
   const handlePlaySong = (song: Song) => {
     setCurrentSong(song);
     setIsPlaying(true);
-    setQueue(queue.length > 0 ? queue : [song]);
-    setCurrentIndex(queue.findIndex((s) => s.id === song.id));
+
+    // If there's already a queue, find the song's index
+    if (queue.length > 0) {
+      const songIndex = queue.findIndex((s) => s.id === song.id);
+      if (songIndex !== -1) {
+        setCurrentIndex(songIndex);
+      } else {
+        // Song not in current queue, add it to the queue
+        const newQueue = [...queue, song];
+        setQueue(newQueue);
+        setCurrentIndex(newQueue.length - 1);
+      }
+    } else {
+      // No queue exists, create one with just this song
+      setQueue([song]);
+      setCurrentIndex(0);
+    }
   };
 
   const handlePlayPause = () => {
@@ -68,19 +83,62 @@ export default function AppLayout({ children }: AppLayoutProps) {
   };
 
   const handleNext = () => {
-    if (queue.length > 0) {
-      const nextIndex = (currentIndex + 1) % queue.length;
-      setCurrentIndex(nextIndex);
-      setCurrentSong(queue[nextIndex]);
+    if (queue.length === 0) return;
+
+    let nextIndex: number;
+
+    if (isRepeating === "one") {
+      // Repeat current song
+      nextIndex = currentIndex;
+    } else if (isShuffling) {
+      // Shuffle mode: pick random song
+      nextIndex = Math.floor(Math.random() * queue.length);
+    } else if (isRepeating === "all") {
+      // Repeat all: loop to beginning when at end
+      nextIndex = (currentIndex + 1) % queue.length;
+    } else if (isRepeating === "none") {
+      // No repeat: stop at end or go to next
+      if (currentIndex >= queue.length - 1) {
+        setIsPlaying(false);
+        return;
+      }
+      nextIndex = currentIndex + 1;
+    } else {
+      // Default: loop to beginning
+      nextIndex = (currentIndex + 1) % queue.length;
     }
+
+    setCurrentIndex(nextIndex);
+    setCurrentSong(queue[nextIndex]);
+    setCurrentTime(0);
   };
 
   const handlePrevious = () => {
-    if (queue.length > 0) {
-      const prevIndex = (currentIndex - 1 + queue.length) % queue.length;
-      setCurrentIndex(prevIndex);
-      setCurrentSong(queue[prevIndex]);
+    if (queue.length === 0) return;
+
+    // If we're more than 3 seconds into the song, restart current song
+    if (currentTime > 3) {
+      setCurrentTime(0);
+      return;
     }
+
+    let prevIndex: number;
+
+    if (isRepeating === "one") {
+      // Repeat current song - restart it
+      setCurrentTime(0);
+      return;
+    } else if (isShuffling) {
+      // Shuffle mode: pick random song
+      prevIndex = Math.floor(Math.random() * queue.length);
+    } else {
+      // Normal previous: go to previous song
+      prevIndex = (currentIndex - 1 + queue.length) % queue.length;
+    }
+
+    setCurrentIndex(prevIndex);
+    setCurrentSong(queue[prevIndex]);
+    setCurrentTime(0);
   };
 
   const handleSeek = (time: number) => {
@@ -162,6 +220,8 @@ export default function AppLayout({ children }: AppLayoutProps) {
         onToggleLike={handleToggleLike}
         isShuffling={isShuffling}
         isRepeating={isRepeating}
+        queue={queue}
+        currentIndex={currentIndex}
       />
     </AudioContext.Provider>
   );

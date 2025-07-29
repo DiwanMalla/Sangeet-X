@@ -35,6 +35,8 @@ interface AudioPlayerProps {
   onToggleLike: () => void;
   isShuffling: boolean;
   isRepeating: "none" | "one" | "all";
+  queue: Song[];
+  currentIndex: number;
 }
 
 export default function AudioPlayer({
@@ -53,6 +55,8 @@ export default function AudioPlayer({
   onToggleLike,
   isShuffling,
   isRepeating,
+  queue,
+  currentIndex,
 }: AudioPlayerProps) {
   const [isExpanded, setIsExpanded] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
@@ -259,6 +263,12 @@ export default function AudioPlayer({
 
   const progress = duration > 0 ? (currentTime / duration) * 100 : 0;
 
+  // Determine if next/previous should be disabled
+  const canGoNext =
+    queue.length > 1 &&
+    (isRepeating !== "none" || currentIndex < queue.length - 1);
+  const canGoPrevious = queue.length > 1;
+
   if (!currentSong) return null;
 
   return (
@@ -365,7 +375,8 @@ export default function AudioPlayer({
                 variant="ghost"
                 size="icon"
                 onClick={onPrevious}
-                className="text-white hover:bg-gray-800"
+                disabled={!canGoPrevious}
+                className="text-white hover:bg-gray-800 disabled:text-gray-600 disabled:hover:bg-transparent"
               >
                 <SkipBack className="h-6 w-6" />
               </Button>
@@ -385,7 +396,8 @@ export default function AudioPlayer({
                 variant="ghost"
                 size="icon"
                 onClick={onNext}
-                className="text-white hover:bg-gray-800"
+                disabled={!canGoNext}
+                className="text-white hover:bg-gray-800 disabled:text-gray-600 disabled:hover:bg-transparent"
               >
                 <SkipForward className="h-6 w-6" />
               </Button>
@@ -486,7 +498,8 @@ export default function AudioPlayer({
                 variant="ghost"
                 size="icon"
                 onClick={onPrevious}
-                className="text-white hover:bg-gray-800"
+                disabled={!canGoPrevious}
+                className="text-white hover:bg-gray-800 disabled:text-gray-600 disabled:hover:bg-transparent"
               >
                 <SkipBack className="h-5 w-5" />
               </Button>
@@ -506,7 +519,8 @@ export default function AudioPlayer({
                 variant="ghost"
                 size="icon"
                 onClick={onNext}
-                className="text-white hover:bg-gray-800"
+                disabled={!canGoNext}
+                className="text-white hover:bg-gray-800 disabled:text-gray-600 disabled:hover:bg-transparent"
               >
                 <SkipForward className="h-5 w-5" />
               </Button>

@@ -4,6 +4,7 @@ import { useEffect, useState, useCallback, useRef } from "react";
 import { useParams, useRouter } from "next/navigation";
 import GuestNavbar from "@/components/common/guest-navbar";
 import UpNextComponent from "@/components/ui/up-next-component";
+import { formatTime } from "@/lib/utils";
 import {
   Play,
   Pause,
@@ -70,6 +71,14 @@ export default function GuestSongPage() {
   const [isSharing, setIsSharing] = useState(false);
   const currentAudioUrl = useRef<string | null>(null);
 
+  // Add state for showing login tooltip
+  const [showPrevTooltip, setShowPrevTooltip] = useState(false);
+  const [showNextTooltip, setShowNextTooltip] = useState(false);
+
+  // Queue management state (for future use when implementing authenticated queue)
+  // const [songQueue, setSongQueue] = useState<Song[]>([]);
+  // const [currentSongIndex, setCurrentSongIndex] = useState(0);
+
   // Load autoplay setting from localStorage on component mount
   useEffect(() => {
     const savedAutoPlay = localStorage.getItem("songAutoPlay");
@@ -85,15 +94,15 @@ export default function GuestSongPage() {
 
   const fetchSong = useCallback(async () => {
     try {
-      // Fetch song data - we only need the main song data here
-      // Components will fetch their own related songs/playlist data
-      const response = await fetch(
+      // Fetch current song data (queue fetching commented out for guests)
+      const songResponse = await fetch(
         `/api/guest/songs/${params.id}?autoplay=false`
       );
-      const data = await response.json();
 
-      if (data.success) {
-        setSongData(data.data);
+      const songData = await songResponse.json();
+
+      if (songData.success) {
+        setSongData(songData.data);
 
         // Fetch subtitles for this song
         const subtitleResponse = await fetch(
@@ -135,20 +144,20 @@ export default function GuestSongPage() {
     }
   }, [fetchSong, audio, duration]);
 
-  // Simple navigation functions - components will handle playlist logic
+  // Navigation functions with queue support - for guest users, redirect to login
   const playNextSong = useCallback(() => {
-    // This will be handled by the playlist component
-    console.log("Next song - handled by playlist component");
-  }, []);
+    // For guests, redirect to login page
+    router.push("/login");
+  }, [router]);
 
   const playPreviousSong = useCallback(() => {
-    // This will be handled by the playlist component
-    console.log("Previous song - handled by playlist component");
-  }, []);
+    // For guests, redirect to login page
+    router.push("/login");
+  }, [router]);
 
-  // For now, disable navigation buttons since components handle their own navigation
-  const canPlayNext = false;
-  const canPlayPrevious = false;
+  // Always show buttons as enabled for guests (they'll show tooltip on hover/click)
+  const canPlayNext = true;
+  // canPlayPrevious is always true for UI, defined inline where needed
 
   // Create audio element when song URL changes
   useEffect(() => {
@@ -188,6 +197,19 @@ export default function GuestSongPage() {
           });
       });
 
+      // Handle song end - auto-play next song
+      const handleEnded = () => {
+        setIsPlaying(false);
+        setCurrentTime(0);
+
+        // Auto-play next song if autoplay is enabled and there are more songs
+        if (autoPlay && canPlayNext) {
+          playNextSong();
+        }
+      };
+
+      audioElement.addEventListener("ended", handleEnded);
+
       setAudio(audioElement);
 
       // Cleanup function
@@ -196,37 +218,13 @@ export default function GuestSongPage() {
         audioElement.removeEventListener("loadedmetadata", () => {});
         audioElement.removeEventListener("timeupdate", () => {});
         audioElement.removeEventListener("canplaythrough", () => {});
+        audioElement.removeEventListener("ended", handleEnded);
       };
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [songData?.song.audioUrl]); // Intentionally excluding 'audio' to prevent infinite loop
+  }, [songData?.song.audioUrl]); // Keep minimal dependencies
 
-  // Separate effect for handling song ended event
-  useEffect(() => {
-    if (audio) {
-      const handleEnded = () => {
-        setIsPlaying(false);
-        setCurrentTime(0);
-
-        // Auto-play next song if autoplay is enabled
-        if (autoPlay) {
-          // Check if Up Next component has exposed auto-advance function
-          const autoAdvance = (
-            window as Window & { playlistAutoAdvance?: () => void }
-          ).playlistAutoAdvance;
-          if (autoAdvance) {
-            autoAdvance();
-          }
-        }
-      };
-
-      audio.addEventListener("ended", handleEnded);
-
-      return () => {
-        audio.removeEventListener("ended", handleEnded);
-      };
-    }
-  }, [audio, autoPlay]);
+  // Remove the separate ended effect since we handle it above
 
   const handleAutoAdvance = useCallback(
     (nextSongId: string) => {
@@ -259,12 +257,6 @@ export default function GuestSongPage() {
     const newTime = parseFloat(e.target.value);
     audio.currentTime = newTime;
     setCurrentTime(newTime);
-  };
-
-  const formatTime = (seconds: number) => {
-    const mins = Math.floor(seconds / 60);
-    const secs = Math.floor(seconds % 60);
-    return `${mins}:${secs.toString().padStart(2, "0")}`;
   };
 
   const handleLoginRedirect = () => {
@@ -519,35 +511,75 @@ export default function GuestSongPage() {
                   </div>
 
                   {/* Control Buttons */}
-                  <div className="flex items-center justify-center space-x-3">
-                    <button
-                      onClick={playPreviousSong}
-                      disabled={!canPlayPrevious}
-                      className={`p-1.5 transition-colors ${
-                        canPlayPrevious
-                          ? "text-white/80 hover:text-white"
-                          : "text-white/30 cursor-not-allowed"
-                      }`}
-                    >
-                      <SkipBack size={18} />
-                    </button>
+                  <div className="flex items-center justify-center space-x-3 relative">
+                    {/* Previous Button with Tooltip */}
+                    <div className="relative">
+                      <button
+                        onClick={playPreviousSong}
+                        onMouseEnter={() => setShowPrevTooltip(true)}
+                        onMouseLeave={() => setShowPrevTooltip(false)}
+                        className="p-1.5 transition-colors text-white/80 hover:text-white relative group"
+                      >
+                        <SkipBack size={18} />
+                      </button>
+
+                      {/* Previous Button Tooltip */}
+                      {showPrevTooltip && (
+                        <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-purple-600 text-white text-xs rounded-lg shadow-lg whitespace-nowrap animate-in fade-in duration-200 z-50">
+                          <div className="text-center">
+                            <p className="font-medium">Login Required</p>
+                            <p className="text-purple-200 mb-2">
+                              Previous song feature
+                            </p>
+                            <button
+                              onClick={() => router.push("/login")}
+                              className="px-2 py-1 bg-white/20 hover:bg-white/30 rounded text-xs transition-colors"
+                            >
+                              Login Now
+                            </button>
+                          </div>
+                          <div className="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-purple-600"></div>
+                        </div>
+                      )}
+                    </div>
+
                     <button
                       onClick={togglePlay}
                       className="p-2.5 bg-white/20 backdrop-blur-sm text-white rounded-full hover:bg-white/30 transition-colors"
                     >
                       {isPlaying ? <Pause size={20} /> : <Play size={20} />}
                     </button>
-                    <button
-                      onClick={playNextSong}
-                      disabled={!canPlayNext}
-                      className={`p-1.5 transition-colors ${
-                        canPlayNext
-                          ? "text-white/80 hover:text-white"
-                          : "text-white/30 cursor-not-allowed"
-                      }`}
-                    >
-                      <SkipForward size={18} />
-                    </button>
+
+                    {/* Next Button with Tooltip */}
+                    <div className="relative">
+                      <button
+                        onClick={playNextSong}
+                        onMouseEnter={() => setShowNextTooltip(true)}
+                        onMouseLeave={() => setShowNextTooltip(false)}
+                        className="p-1.5 transition-colors text-white/80 hover:text-white relative group"
+                      >
+                        <SkipForward size={18} />
+                      </button>
+
+                      {/* Next Button Tooltip */}
+                      {showNextTooltip && (
+                        <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-purple-600 text-white text-xs rounded-lg shadow-lg whitespace-nowrap animate-in fade-in duration-200 z-50">
+                          <div className="text-center">
+                            <p className="font-medium">Login Required</p>
+                            <p className="text-purple-200 mb-2">
+                              Next song feature
+                            </p>
+                            <button
+                              onClick={() => router.push("/login")}
+                              className="px-2 py-1 bg-white/20 hover:bg-white/30 rounded text-xs transition-colors"
+                            >
+                              Login Now
+                            </button>
+                          </div>
+                          <div className="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-purple-600"></div>
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </div>
               </div>
