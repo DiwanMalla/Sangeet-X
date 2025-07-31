@@ -420,8 +420,6 @@ export default function HomePage() {
         onToggleLike={handleToggleLike}
         isShuffling={isShuffling}
         isRepeating={isRepeating}
-        queue={queue}
-        currentIndex={currentIndex}
       />
     </div>
   );
