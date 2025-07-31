@@ -70,7 +70,6 @@ export default function UpNextComponent({
           .playlistAutoAdvance;
       }
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [songs, currentSongIndex, autoPlay, onAutoAdvance]);
 
   useEffect(() => {

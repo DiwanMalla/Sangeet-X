@@ -35,8 +35,8 @@ interface AudioPlayerProps {
   onToggleLike: () => void;
   isShuffling: boolean;
   isRepeating: "none" | "one" | "all";
-  queue: Song[];
-  currentIndex: number;
+  queue?: Song[];
+  currentIndex?: number;
 }
 
 export default function AudioPlayer({
@@ -55,8 +55,8 @@ export default function AudioPlayer({
   onToggleLike,
   isShuffling,
   isRepeating,
-  queue,
-  currentIndex,
+  queue = [],
+  currentIndex = 0,
 }: AudioPlayerProps) {
   const [isExpanded, setIsExpanded] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
